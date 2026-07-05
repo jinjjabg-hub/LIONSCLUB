@@ -39,6 +39,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'M
 .sync.err { background: var(--rd); color: var(--r); }
 .sync-txt { flex: 1; line-height: 1.5; }
 .sync-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.misswarn { background: var(--rd); color: var(--r); border-radius: 10px; padding: 11px 14px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.65; box-shadow: var(--sh); }
+.misswarn b { font-weight: 700; }
 /* LOADING */
 .loadbox { text-align: center; padding: 60px 20px; }
 .loadbox-icon { font-size: 40px; margin-bottom: 12px; }
@@ -163,6 +165,8 @@ tbody td { padding: 8px 9px; font-size: 12px; white-space: nowrap; }
     <div class="sync-txt" id="synctxt"></div>
     <button class="sync-btn" id="syncbtn">↻ 동기화</button>
   </div>
+
+  <div class="misswarn" id="misswarn" style="display:none"></div>
 
   <div class="loadbox" id="loadbox">
     <div class="loadbox-icon">⏳</div>
@@ -381,32 +385,53 @@ function candidateMonths(){
   return list;
 }
 function fetchMonth(y, m){
-  var padded = toKey(y,m);                 // 2026-05
-  var unpadded = y + '-' + m;              // 2026-5
-  function tryName(name){
-    return fetch(gvizUrl(name)).then(function(res){
+  var mm = (m<10 ? '0'+m : ''+m);
+  // 탭 이름 흔한 변형들 — 공백/패딩 실수를 자동 흡수
+  var names = [
+    y+'-'+mm,       // 2026-06
+    y+'-'+m,        // 2026-6
+    y+'-'+mm+' ',   // 2026-06 (뒤 공백)
+    ' '+y+'-'+mm,   // 2026-06 (앞 공백)
+    y+'-'+m+' '     // 2026-6 (뒤 공백)
+  ];
+  function tryAt(i){
+    if(i >= names.length) return Promise.resolve(null);
+    return fetch(gvizUrl(names[i])).then(function(res){
       if(!res.ok) throw new Error('http '+res.status);
       return res.text();
     }).then(function(txt){
-      return parseMonthRows(tableToRows(parseGvizText(txt)), y, m);
-    });
+      var md = parseMonthRows(tableToRows(parseGvizText(txt)), y, m);
+      return md ? md : tryAt(i+1);
+    }).catch(function(){ return tryAt(i+1); });
   }
-  return tryName(padded).catch(function(){ return tryName(unpadded); }).catch(function(){ return null; });
+  return tryAt(0);
 }
 function syncFromSheet(){
   setSyncUI('loading');
   var cands = candidateMonths();
-  return Promise.all(cands.map(function(c){ return fetchMonth(c.y, c.m); }))
+  return Promise.all(cands.map(function(c){
+    return fetchMonth(c.y, c.m).then(function(md){ return {c:c, md:md}; });
+  }))
     .then(function(results){
       var monthly = {};
-      results.forEach(function(md){ if(md) monthly[toKey(md.year, md.month)] = md; });
+      results.forEach(function(r){ if(r.md) monthly[toKey(r.md.year, r.md.month)] = r.md; });
       var keys = Object.keys(monthly).sort();
       if(!keys.length) throw new Error('시트에서 유효한 탭을 찾지 못했어요');
       // 최신 달 기준 6개월 + 여유만 유지
       var latest = keys[keys.length-1];
       var start = rollingStart(latest);
       keys.forEach(function(k){ if(k < start) delete monthly[k]; });
-      var cache = { ts: Date.now(), monthly: monthly };
+      // 진단: '이미 지난 달'인데 못 읽은 탭만 경고 (이번 달은 탭 없어도 정상 → 오탐 제외)
+      var now = new Date(), thisKey = toKey(now.getFullYear(), now.getMonth()+1);
+      var loadedKeys = Object.keys(monthly).sort();
+      var firstLoaded = loadedKeys[0];
+      var missing = [];
+      results.forEach(function(r){
+        var k = toKey(r.c.y, r.c.m);
+        if(!monthly[k] && k > firstLoaded && k < thisKey) missing.push(k);
+      });
+      missing.sort();
+      var cache = { ts: Date.now(), monthly: monthly, missing: missing };
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e){}
       applyData(cache, true);
       return true;
@@ -429,8 +454,18 @@ function applyData(cache, fresh){
   $('pview').style.display = 'block';
   $('syncbar').style.display = 'flex';
   setSyncUI(fresh?'fresh':'cached', cache.ts);
+  renderMissing(cache.missing);
   updateDbar(); renderStats(); renderTable(); renderChips();
   if(selName){ buildPbtns(); updatePersonal(); }
+}
+function renderMissing(missing){
+  var el = $('misswarn');
+  if(!el) return;
+  if(!missing || !missing.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML = '⚠️ <b>못 읽은 탭: '+missing.join(', ')+'</b><br>'+
+    '이 달 데이터가 계산에서 빠졌어요. 구글시트에서 해당 탭 이름이 정확히 <b>'+missing[0]+
+    '</b> 인지 확인해 주세요 (앞뒤 공백·오타 주의). 고친 뒤 <b>↻ 동기화</b>를 눌러주세요.';
 }
 function fmtTs(ts){
   var d = new Date(ts);
