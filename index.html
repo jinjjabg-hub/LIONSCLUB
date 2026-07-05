@@ -1,812 +1,917 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>부산라이온스클럽 디지털 회원수첩</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1f1e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>BNI 트래픽 라이트</title>
 <style>
-:root{
-  --navy:#1a3a6b;--navy-d:#142d52;--gold:#f0c040;--gold-l:#f7e6ad;--gold-d:#b88a1e;
-  --paper:#f4efe3;--paper-d:#ebe3d2;--card:#fffdf8;--ink:#23262b;--muted:#6a6d75;--line:#e3dccb;
+:root {
+  --bg: #f5f3ee; --sur: #fff; --sur2: #edeae4; --bor: #dedad2;
+  --txt: #1f1e1a; --mut: #8a8880;
+  --g: #1a7a3a; --gd: #d4eddc; --gb: rgba(26,122,58,0.08);
+  --a: #b56a00; --ad: #fde8c0; --ab: rgba(181,106,0,0.08);
+  --r: #c0292b; --rd: #fad4d4; --rb: rgba(192,41,43,0.08);
+  --gr: #6b7280; --grd: #e5e7eb;
+  --ac: #1d4ed8; --acb: rgba(29,78,216,0.08);
+  --sh: 0 1px 8px rgba(0,0,0,0.07);
+  --mono: 'SF Mono', 'Roboto Mono', Consolas, monospace;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Noto Sans KR',sans-serif;background:#1a1e25;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden}
-#app{width:min(412px,100vw);height:min(892px,100vh);background:var(--paper);border-radius:min(46px,0px);overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 11px #0c0f14}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper);animation:fadeUp .25s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.scroll::-webkit-scrollbar{display:none}
-
-/* 공통 */
-.appbar{background:var(--navy);padding:14px 16px;flex-shrink:0;display:flex;align-items:center;gap:10px}
-.appbar-back{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.appbar-title{color:#fff;font-size:17px;font-weight:700;flex:1}
-.appbar-sub{color:rgba(255,255,255,.65);font-size:12px;margin-top:1px}
-.section-label{padding:14px 20px 6px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:0 16px 14px;overflow:hidden}
-.row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);gap:12px}
-.row:last-child{border-bottom:none}
-.row-label{font-size:12px;color:var(--muted);margin-bottom:2px}
-.row-val{font-size:14px;color:var(--ink);font-weight:500;word-break:keep-all;line-height:1.4}
-.btn-primary{width:100%;min-height:56px;border-radius:14px;background:var(--navy);color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-gold{background:var(--gold);color:var(--navy-d)}
-.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.badge-exec{background:rgba(240,192,64,.18);color:var(--gold-d)}
-.badge-status{background:rgba(26,58,107,.1);color:var(--navy)}
-
-/* 탭바 */
-#tabbar{background:#fff;border-top:1px solid var(--line);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px)}
-.tab-btn{flex:1;padding:10px 0 8px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--muted);transition:color .15s}
-.tab-btn.active{color:var(--navy)}
-.tab-btn svg{transition:transform .15s}
-.tab-btn.active svg{transform:scale(1.12)}
-
-/* 표지 */
-#cover{background:radial-gradient(130% 90% at 50% 8%,#21477f,#0d1f3d);color:#fff;align-items:center;justify-content:space-between;padding:0;text-align:center;position:absolute;inset:0;display:flex;flex-direction:column;z-index:10}
-.cover-frame{position:absolute;inset:16px;border:1.5px solid rgba(240,192,64,.5);border-radius:22px;pointer-events:none}
-.cover-frame2{position:absolute;inset:22px;border:1px solid rgba(240,192,64,.22);border-radius:17px;pointer-events:none}
-.crest{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#d4a017);display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;color:var(--navy-d);box-shadow:0 0 0 6px rgba(240,192,64,.25),0 8px 28px rgba(0,0,0,.3);letter-spacing:-2px}
-
-/* 회원 행 */
-.member-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;gap:13px;background:none;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line)}
-.member-row:active{background:var(--paper-d)}
-.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2a4d8f,#1a3060);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
-.avatar.gold{background:linear-gradient(135deg,var(--gold),#d4a017);color:var(--navy-d)}
-.member-name{font-size:17px;font-weight:700;color:var(--ink)}
-.member-sub{font-size:13px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
-
-/* 인덱스 사이드바 */
-#index-rail{position:absolute;right:0;top:0;bottom:0;width:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-.idx-btn{width:22px;height:20px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--navy);border-radius:5px;transition:background .1s}
-.idx-btn:active{background:var(--gold);color:var(--navy-d)}
-.idx-btn.disabled{color:#ccc;cursor:default}
-
-/* 회원카드 */
-.card-hero{background:linear-gradient(135deg,#1c3e72,#0e2140);padding:24px 20px 20px;color:#fff;display:flex;align-items:center;gap:16px}
-.avatar-lg{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#d4a017);color:var(--navy-d);font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.card-name{font-size:24px;font-weight:800;letter-spacing:.5px}
-.card-rom{font-size:12px;color:rgba(247,230,173,.8);margin-top:4px}
-.card-role-badge{display:inline-block;padding:4px 12px;border-radius:20px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);font-size:13px;font-weight:700;color:var(--gold);margin-top:8px}
-
-/* 집행부 */
-.exec-chief{background:var(--card);border:2px solid var(--navy);border-radius:16px;margin:0 16px 10px;padding:16px;display:flex;align-items:center;gap:14px}
-.exec-row{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 16px 8px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 16px 8px}
-.exec-mini{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
-.exec-mini-role{font-size:11px;color:var(--muted);margin-bottom:3px}
-.exec-mini-name{font-size:15px;font-weight:700;color:var(--ink)}
-
-/* 헌장 */
-.tab-row{display:flex;border-bottom:2px solid var(--line);background:var(--card);flex-shrink:0;overflow-x:auto}
-.tab-row::-webkit-scrollbar{display:none}
-.reg-tab{padding:12px 16px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
-.reg-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
-.reg-content{padding:16px 20px;line-height:1.85;font-size:14px;color:var(--ink)}
-.reg-h1{font-size:18px;font-weight:800;color:var(--navy);margin:20px 0 8px;font-family:Georgia,serif}
-.reg-h2{font-size:15px;font-weight:700;color:var(--navy-d);margin:14px 0 6px}
-.search-box{margin:10px 16px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-size:15px;width:calc(100% - 32px);outline:none;color:var(--ink)}
-.search-box:focus{border-color:var(--navy)}
-.highlight{background:#fff3c4;border-radius:2px}
-
-/* 연혁 */
-.year-card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 16px 10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.year-card.current{border:2px solid var(--navy)}
-.year-badge-current{background:var(--navy);color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.year-badge-past{background:var(--paper-d);color:var(--muted);padding:3px 10px;border-radius:20px;font-size:11px}
-
-/* 토스트 */
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(14,33,64,.94);color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:999;display:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+.nav { background: var(--txt); padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
+.nav-logo { width: 32px; height: 32px; background: var(--ac); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: #fff; flex-shrink: 0; }
+.nav-info { flex: 1; min-width: 0; }
+.nav-title { color: #fff; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-sub { color: rgba(255,255,255,0.45); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-tabs { display: flex; gap: 3px; flex-shrink: 0; }
+.ntab { padding: 6px 11px; border-radius: 6px; border: none; background: transparent; color: rgba(255,255,255,0.45); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.ntab.on { background: var(--ac); color: #fff; }
+.main { max-width: 1100px; margin: 0 auto; padding: 16px 14px 30px; }
+/* SYNC BAR */
+.sync { border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; font-size: 12px; box-shadow: var(--sh); }
+.sync.on  { background: var(--gd); color: var(--g); }
+.sync.off { background: var(--ad); color: var(--a); }
+.sync.err { background: var(--rd); color: var(--r); }
+.sync-txt { flex: 1; line-height: 1.5; }
+.sync-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+/* LOADING */
+.loadbox { text-align: center; padding: 60px 20px; }
+.loadbox-icon { font-size: 40px; margin-bottom: 12px; }
+.loadbox-t { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.loadbox-s { font-size: 12px; color: var(--mut); line-height: 1.8; }
+/* DATABAR */
+.dbar { background: var(--sur); border: 1px solid var(--bor); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; box-shadow: var(--sh); }
+.dbar b { color: var(--ac); }
+.mchips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 7px; }
+.mc { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--sur2); border: 1px solid var(--bor); color: var(--mut); }
+.mc.cf { background: var(--acb); border-color: var(--ac); color: var(--ac); font-weight: 600; }
+.mc.og { background: var(--ab); border-color: var(--ad); color: var(--a); font-weight: 600; }
+/* STATS */
+.srow { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+.sc { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; padding: 12px 10px; cursor: pointer; box-shadow: var(--sh); text-align: center; }
+.sc-lbl { font-size: 11px; color: var(--mut); margin-bottom: 4px; }
+.sc-val { font-size: 24px; font-weight: 900; font-family: var(--mono); }
+.vg { color: var(--g); } .va { color: var(--a); } .vr { color: var(--r); } .vgr { color: var(--gr); }
+/* TABLE */
+.twrap { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; overflow: hidden; box-shadow: var(--sh); }
+.thead2 { padding: 11px 14px; border-bottom: 1px solid var(--bor); }
+.ttitle { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.fbtns { display: flex; gap: 4px; flex-wrap: wrap; }
+.fb { padding: 4px 10px; border-radius: 12px; border: 1px solid var(--bor); background: transparent; color: var(--mut); font-size: 11px; cursor: pointer; font-family: inherit; }
+.fb.on { border-color: var(--ac); color: var(--ac); background: var(--acb); }
+.fb.fg.on { border-color: var(--g); color: var(--g); background: var(--gb); }
+.fb.fa.on { border-color: var(--a); color: var(--a); background: var(--ab); }
+.fb.fr.on { border-color: var(--r); color: var(--r); background: var(--rb); }
+.fb.fgr.on { border-color: var(--gr); color: var(--gr); background: rgba(107,114,128,.08); }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 7px 9px; text-align: left; font-size: 10px; font-weight: 600; color: var(--mut); border-bottom: 1px solid var(--bor); background: var(--sur2); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--bor); cursor: pointer; }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 8px 9px; font-size: 12px; white-space: nowrap; }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge.Green { background: var(--gd); color: var(--g); }
+.badge.Amber { background: var(--ad); color: var(--a); }
+.badge.Red { background: var(--rd); color: var(--r); }
+.badge.Grey { background: var(--grd); color: var(--gr); }
+/* PERSONAL */
+.psearch { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: var(--sh); }
+.ps-lbl { font-size: 12px; color: var(--mut); margin-bottom: 8px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { padding: 6px 12px; border-radius: 12px; border: 1px solid var(--bor); background: var(--sur2); color: var(--txt); font-size: 12px; cursor: pointer; font-family: inherit; }
+.chip.on { border-color: var(--ac); color: var(--ac); background: var(--acb); font-weight: 600; }
+.pdet { display: none; }
+.pdet.show { display: block; }
+.pbar { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; box-shadow: var(--sh); }
+.pbar-lbl { font-size: 11px; color: var(--mut); margin-bottom: 9px; }
+.pbtns { display: flex; gap: 5px; flex-wrap: wrap; }
+.pbtn { padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--bor); background: var(--sur2); color: var(--mut); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.pbtn.cur { background: var(--ac); border-color: var(--ac); color: #fff; font-weight: 700; }
+.pbtn.pred { background: var(--a); border-color: var(--a); color: #fff; font-weight: 700; }
+.pcard { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: var(--sh); }
+.pcard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.pname { font-size: 19px; font-weight: 900; }
+.pbig { font-family: var(--mono); font-size: 40px; font-weight: 900; line-height: 1; text-align: right; }
+.pbig-sub { font-size: 11px; color: var(--mut); text-align: right; margin-top: 2px; }
+.nacard { background: var(--sur2); border: 1px solid var(--bor); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.na-lbl { font-size: 12px; color: var(--mut); }
+.na-score { font-family: var(--mono); font-size: 24px; font-weight: 900; }
+.fb-box { border-radius: 12px; padding: 14px 16px; margin-bottom: 11px; border: 1.5px solid; }
+.fb-grey { background: #f3f4f6; border-color: #9ca3af; }
+.fb-red { background: #fff5f5; border-color: #fca5a5; }
+.fb-amber { background: #fffbeb; border-color: #fcd34d; }
+.fb-green { background: #f0fdf4; border-color: #86efac; }
+.fb-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.ftg { color: #374151; } .ftr { color: var(--r); } .fta { color: var(--a); } .ftg2 { color: var(--g); }
+.fb-cnt { font-size: 13px; color: var(--mut); padding: 5px 0 9px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 7px; }
+.fb-cnt b { color: var(--txt); font-size: 15px; }
+.fb-row { font-size: 13px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.fb-row:last-child { border-bottom: none; }
+.fb-ico { min-width: 20px; }
+.fb-txt { flex: 1; }
+.fb-pts { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--g); white-space: nowrap; padding-left: 6px; }
+.sec { font-size: 11px; font-weight: 700; color: var(--mut); letter-spacing: .05em; margin: 4px 0 8px; }
+.awrap { overflow-x: auto; margin-bottom: 12px; -webkit-overflow-scrolling: touch; }
+.atable { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--sur); border-radius: 10px; overflow: hidden; box-shadow: var(--sh); }
+.atable th { padding: 7px 9px; background: var(--sur2); color: var(--mut); font-size: 10px; font-weight: 600; text-align: center; border-bottom: 1px solid var(--bor); white-space: nowrap; }
+.atable td { padding: 7px 9px; border-bottom: 1px solid var(--bor); text-align: center; font-family: var(--mono); white-space: nowrap; }
+.atable td.albl { text-align: left; font-family: inherit; font-weight: 500; background: var(--sur2); }
+.atable tr:last-child td { border-bottom: none; }
+.ccur { color: var(--ac); font-weight: 600; }
+.cok { color: var(--g); font-weight: 700; }
+.cbad { color: var(--r); font-weight: 700; }
+.cmut { color: var(--mut); }
+.copybtn { width: 100%; padding: 15px; background: #C8102E; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 12px; }
+.copybtn:active { opacity: .85; }
+/* TOAST */
+.toast { position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--txt); color: #fff; border-radius: 10px; padding: 11px 18px; font-size: 13px; z-index: 999; display: none; max-width: 90vw; text-align: center; }
+.toast.show { display: block; }
+.toast.ok { background: var(--g); }
+.toast.err { background: var(--r); }
+/* LOTTO */
+.lotto-wrap { margin-top: 18px; background: var(--sur); border: 1px solid var(--bor); border-radius: 14px; padding: 16px; box-shadow: var(--sh); }
+.lotto-title { font-size: 12px; font-weight: 700; color: var(--mut); margin-bottom: 12px; }
+.lotto-balls { display: flex; justify-content: center; align-items: center; gap: 7px; min-height: 56px; margin-bottom: 14px; flex-wrap: wrap; }
+.lotto-ball { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.15); opacity: 0; transform: scale(0.5); transition: opacity .3s, transform .3s; }
+.lotto-ball.show { opacity: 1; transform: scale(1); }
+.lotto-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#C8102E,#a00d24); color: #fff; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.lotto-btn:disabled { opacity: .5; }
+.credit { text-align: center; padding: 18px; font-size: 11px; color: var(--mut); }
+@media(max-width:640px) { .srow { grid-template-columns: repeat(2,1fr); } }
 </style>
 </head>
 <body>
-<div id="app">
-
-  <!-- 표지 -->
-  <div id="cover">
-    <div class="cover-frame"></div>
-    <div class="cover-frame2"></div>
-    <div style="padding-top:56px">
-      <div style="font-size:12px;letter-spacing:3px;color:var(--gold-l);font-weight:600">국제라이온스협회 355-A지구</div>
-      <div style="width:36px;height:1px;background:var(--gold);margin:12px auto 0;opacity:.7"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:center">
-      <div class="crest">L</div>
-      <div style="margin-top:28px">
-        <h1 style="font-size:30px;font-weight:800;letter-spacing:1px">부산라이온스클럽</h1>
-        <div style="font-size:13px;letter-spacing:4px;color:var(--gold-l);margin-top:10px;font-weight:500">BUSAN LIONS CLUB</div>
-      </div>
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:9px 20px;border-radius:30px;background:rgba(240,192,64,.13);border:1px solid rgba(240,192,64,.4)">
-        <span style="font-size:15px;color:var(--gold);font-weight:700">제65대</span>
-        <span style="width:5px;height:5px;border-radius:5px;background:var(--gold)"></span>
-        <span style="font-size:15px;color:#fff;font-weight:700">2024 – 2025</span>
-      </div>
-    </div>
-    <div style="width:100%;padding:0 28px 44px">
-      <div style="font-size:14px;letter-spacing:7px;color:var(--gold-l);margin-bottom:24px;font-weight:500;text-align:center">WE&nbsp;&nbsp;SERVE</div>
-      <button class="btn-primary btn-gold" onclick="openApp()" style="font-size:18px">
-        회원수첩 펼치기
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div style="font-size:11px;color:rgba(247,230,173,.5);margin-top:14px;text-align:center;letter-spacing:1px">No. 025769 · 조직총회 1960. 6. 18</div>
-    </div>
+<div class="nav">
+  <div class="nav-logo">B</div>
+  <div class="nav-info">
+    <div class="nav-title">BNI 트래픽 라이트</div>
+    <div class="nav-sub" id="nsub">데이터 불러오는 중...</div>
   </div>
-
-  <!-- 메인 컨테이너 -->
-  <div id="main" style="display:none;flex:1;position:relative;overflow:hidden;flex-direction:column">
-    <div id="screens" style="flex:1;position:relative;overflow:hidden"></div>
-    <div id="tabbar">
-      <button class="tab-btn active" onclick="showTab('home')" id="tab-home">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        홈
-      </button>
-      <button class="tab-btn" onclick="showTab('members')" id="tab-members">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 21v-1a6 6 0 0112 0v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="8" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M21 21v-1a4 4 0 00-4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        회원
-      </button>
-      <button class="tab-btn" onclick="showTab('exec')" id="tab-exec">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/></svg>
-        집행부
-      </button>
-      <button class="tab-btn" onclick="showTab('rules')" id="tab-rules">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        규정
-      </button>
-      <button class="tab-btn" onclick="showTab('history')" id="tab-history">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        연혁
-      </button>
-    </div>
+  <div class="nav-tabs">
+    <button class="ntab on" id="tab-panel">📊 전체</button>
+    <button class="ntab" id="tab-personal">👤 개인</button>
   </div>
 </div>
 
-<div id="toast"></div>
+<div class="main">
+  <div class="sync" id="syncbar" style="display:none">
+    <span id="syncico">🔄</span>
+    <div class="sync-txt" id="synctxt"></div>
+    <button class="sync-btn" id="syncbtn">↻ 동기화</button>
+  </div>
+
+  <div class="loadbox" id="loadbox">
+    <div class="loadbox-icon">⏳</div>
+    <div class="loadbox-t">구글시트에서 데이터 불러오는 중...</div>
+    <div class="loadbox-s">처음 한 번은 인터넷 연결이 필요해요.<br>다음부터는 오프라인에서도 작동합니다.</div>
+  </div>
+
+  <div class="dbar" id="dbar" style="display:none">
+    <div id="dinfo"></div>
+    <div class="mchips" id="mchips"></div>
+  </div>
+
+  <div id="pview" style="display:none">
+    <div class="srow" id="srow"></div>
+    <div class="twrap">
+      <div class="thead2">
+        <div class="ttitle" id="ttitle">전체 멤버 현황</div>
+        <div class="fbtns">
+          <button class="fb on" id="fall">전체</button>
+          <button class="fb fg" id="fgreen">🟢 그린</button>
+          <button class="fb fa" id="famber">🟡 앰버</button>
+          <button class="fb fr" id="fred">🔴 레드</button>
+          <button class="fb fgr" id="fgrey">⬛ 그레이</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table>
+          <thead><tr><th>멤버</th><th>주수</th><th>출결</th><th>리퍼럴</th><th>비지터</th><th>1:1</th><th>감사장</th><th>교육</th><th>점수</th><th>상태</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="perv" style="display:none">
+    <div class="psearch">
+      <div class="ps-lbl">이름을 선택하세요</div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="pdet" id="pdet">
+      <div class="pbar">
+        <div class="pbar-lbl">📅 기준 선택 (확정 = 마감된 달 / 예상 = 예측)</div>
+        <div class="pbtns" id="pbtns"></div>
+      </div>
+      <div class="pcard" id="pcard"></div>
+      <div class="sec">📋 활동 현황</div>
+      <div class="awrap"><table class="atable" id="atable"></table></div>
+      <div class="nacard" id="nacard"></div>
+      <button class="copybtn" id="copybtn">📋 카톡 피드백 복사</button>
+      <div class="sec">💬 목표별 피드백</div>
+      <div id="fbwrap"></div>
+      <div class="lotto-wrap">
+        <div class="lotto-title">🍀 오늘의 행운 번호</div>
+        <div class="lotto-balls" id="lotto-balls">
+          <div class="lotto-ball" id="lb0"><span id="ls0">?</span></div>
+          <div class="lotto-ball" id="lb1"><span id="ls1">?</span></div>
+          <div class="lotto-ball" id="lb2"><span id="ls2">?</span></div>
+          <div class="lotto-ball" id="lb3"><span id="ls3">?</span></div>
+          <div class="lotto-ball" id="lb4"><span id="ls4">?</span></div>
+          <div class="lotto-ball" id="lb5"><span id="ls5">?</span></div>
+        </div>
+        <button class="lotto-btn" id="lotto-btn">🎯 번호 뽑기</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="credit">제작 : BNI부산 파이오니어 챕터 송승훈</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ===== 데이터 =====
-const CLUB = {
-  name:'부산라이온스클럽', en:'BUSAN LIONS CLUB', district:'국제라이온스협회 355-A지구',
-  no:'No. 025769', term:'2024 – 2025', gen:'제65대',
-  founded:'1960년 6월 18일', charter:'1960년 9월 24일',
-  board:'매월 3일', monthly:'매월 18일',
-  addr:'부산광역시 중구 중앙대로 124, 4층 (부산라이온스 빌딩)', zip:'48937',
-  tel:'(051) 634-7288', fax:'(051) 645-0882', email:'lcbusan@hanmail.net',
-  bank:'부산은행 101-2012-6795-02', bankHolder:'예금주: 부산라이온스클럽 허광탁',
-  intlPresident:'파브리시오 올리베이라', intlTheme:'Make Your Mark! · 새로운 발자취를 만듭니다',
-  governor:'조홍제', governorTheme:'감동의 봉사! · Touching Volunteer Work!',
-  presidentGuide:'다 함께 행복한 나눔 봉사!'
-};
+// ══════════════════════════════════════════════════════════════
+// ★ 설정 (여기만 바꾸면 됩니다)
+// ══════════════════════════════════════════════════════════════
+var SHEET_ID = '1zmNQieMEX3IbovQHytoyuG3RztmGoGTImZlRkYnKKkc';
+var CHAPTER  = '파이오니어';
+var DOW      = 3;   // 미팅 요일: 0일 1월 2화 3수 4목 5금 6토
+var PROBE_BACK = 12; // 최신 탭을 찾기 위해 몇 달 전까지 탐색할지
+// ══════════════════════════════════════════════════════════════
 
-const MEMBERS = [
-  {id:1,name:'허광탁',rom:'HER, KWANG-TARK',role:'회장',group:'집행부',b:'1962.3.4',j:'2012.6',co:'세림기업 대표 · 산업용 자동문',f:'010-3850-0669',status:'정회원',spouse:'정분엽',dica:true},
-  {id:2,name:'곽대훈',rom:'KWAK, DAE-HUN',role:'직전회장',group:'집행부',b:'1975.5.5',j:'2014.12',co:'재현축산·재현플라워 대표',f:'010-3554-9979',status:'제64대 회장',spouse:'이유나',dica:false},
-  {id:3,name:'김두석',rom:'KIM, DOO-SEOK',role:'제2부회장',group:'집행부',b:'1972.12.27',j:'2021.6',co:'영민전력·천우산전 대표 · 전기공사',f:'010-5522-4055',status:'정회원',spouse:'김귀숙',dica:false},
-  {id:4,name:'김근우',rom:'KIM, GEUN-WOO',role:'총무',group:'집행부',b:'1973.8.5',j:'2024.7',co:'종합광고기획 창운 대표',f:'010-5664-5710',status:'정회원',spouse:'이윤겸',dica:false},
-  {id:5,name:'양승현',rom:'YANG, SEUNG-HYUN',role:'재무',group:'집행부',b:'1968.1.29',j:'2018.11',co:'포인트플라워 대표 · 꽃',f:'010-6416-2800',status:'정회원',spouse:'정은주',dica:false},
-  {id:6,name:'박성민',rom:'PARK, SEONG-MIN',role:'라이온테마',group:'집행부',b:'1984.2.26',j:'2024.7',co:'한율부산관세사무소 대표 · 관세사',f:'010-7472-5757',status:'정회원',spouse:'김은미',dica:false},
-  {id:7,name:'장영민',rom:'JANG, YOUNG-MIN',role:'테일튀스터',group:'집행부',b:'1966.8.17',j:'2018.6',co:'광신공조산업 대표 · 환기시설',f:'010-9308-3668',status:'정회원',spouse:'고진숙',dica:false},
-  {id:8,name:'김신근',rom:'KIM, SHIN-KEUN',role:'부총무',group:'집행부',b:'1982.5.16',j:'2018.3',co:'세진종합중기 대표 · 지게차',f:'010-9462-2168',status:'정회원',spouse:'',dica:false},
-  {id:9,name:'임행수',rom:'LIM, HAING-SU',role:'부재무',group:'집행부',b:'1970.9.9',j:'2012.1',co:'부경F/S 대표 · 농산물유통',f:'010-2476-8563',status:'정회원',spouse:'정미남',dica:false},
-  {id:10,name:'이화준',rom:'LEE, HWA-JUN',role:'전회장',group:'전회장',b:'1934.8.10',j:'1982.12',co:'',f:'010-5500-2245',status:'평생회원 · 제36대 회장',spouse:'',dica:false},
-  {id:11,name:'황상영',rom:'HWANG, SANG-YOUNG',role:'전회장·이사',group:'전회장',b:'1932.10.7',j:'1983.3',co:'대한민국도덕국민운동본부 총재',f:'010-2525-5615',status:'평생회원 · 제35대 회장',spouse:'이말순',dica:false},
-  {id:12,name:'안태봉',rom:'AN, TAE-BONG',role:'전회장',group:'전회장',b:'1948.10.14',j:'1988.2',co:'',f:'010-',status:'평생회원 · 제41대 회장',spouse:'',dica:false},
-  {id:13,name:'김영기',rom:'KIM, YOUNG-GI',role:'고문·이사',group:'고문',b:'1951.9.5',j:'1989.7',co:'(주)보경스틸 대표 · 파이프',f:'010-3591-1399',status:'평생회원',spouse:'차해련',dica:false},
-  {id:14,name:'이상영',rom:'LEE, SANG-YUNG',role:'이사',group:'이사',b:'1946.1.24',j:'1989.8',co:'(주)삼익 예능교육미디어 대표',f:'010-6513-0013',status:'평생회원 · 제38대 회장',spouse:'정숙란',dica:true},
-  {id:15,name:'양한조',rom:'YANG, HAN-JO',role:'이사',group:'이사',b:'1955.8.7',j:'1991.3',co:'(주)한지 대표 · 중장비부품',f:'010-3875-5036',status:'평생회원 · 제43대 회장',spouse:'조경자',dica:false},
-  {id:16,name:'김학천',rom:'KIM, HAG-CHEON',role:'이사',group:'이사',b:'1949.8.10',j:'1991.10',co:'',f:'010-4172-5985',status:'평생회원 · 제48대 회장',spouse:'이정숙',dica:false},
-  {id:17,name:'박호석',rom:'PARK, HO-SUK',role:'이사',group:'이사',b:'1953.6.3',j:'1992.12',co:'(주)서호산업 대표 · 목재',f:'010-5508-5061',status:'평생회원',spouse:'최복희',dica:false},
-  {id:18,name:'박시윤',rom:'PARK, SI-YOUN',role:'의전교육위원장·이사',group:'이사',b:'1951.10.21',j:'1993.10',co:'부산원광신협 이사장',f:'010-3872-3366',status:'평생회원 · 제49대 회장',spouse:'조미선',dica:false},
-  {id:19,name:'송우근',rom:'SONG, WOO-GEUN',role:'이사',group:'이사',b:'1953.8.28',j:'1994.6',co:'농협 · 농협동인회 회장',f:'010-3589-9181',status:'평생회원',spouse:'오경란',dica:false},
-  {id:20,name:'윤철수',rom:'YOON, CHUL-SOO',role:'이사',group:'이사',b:'1949.2.18',j:'1994.8',co:'정양해운(주) 전무이사',f:'010-9512-2666',status:'평생회원 · 제46대 회장',spouse:'김순련',dica:false},
-  {id:21,name:'박동철',rom:'PARK, DONG-CHUL',role:'이사',group:'이사',b:'1955.3.5',j:'1995.12',co:'동해분체도장 대표',f:'010-3853-1742',status:'평생회원',spouse:'구자모',dica:false},
-  {id:22,name:'박재민',rom:'PARK, JAE-MIN',role:'이사',group:'이사',b:'1952.8.1',j:'1997.7',co:'BM KOREA 대표 · 의류패션',f:'010-8610-8312',status:'평생회원 · 제47대 회장',spouse:'김영자',dica:false},
-  {id:23,name:'정종국',rom:'JUNG, JONG-KOOK',role:'이사',group:'이사',b:'1953.2.10',j:'2000.12',co:'포세도산업(주) 대표 · 환경상품',f:'010-3862-0196',status:'평생회원 · 제51대 회장',spouse:'남기숙',dica:false},
-  {id:24,name:'이장우',rom:'LEE, JHANG-WOO',role:'이사',group:'이사',b:'1955.12.7',j:'2001.1',co:'(주)대양공업 대표 · 환경공해설비',f:'010-3593-7977',status:'평생회원 · 제53대 회장',spouse:'신정애',dica:false},
-  {id:25,name:'이동철',rom:'LEE, DONG-CHUL',role:'이사',group:'이사',b:'1954.11.29',j:'2001.4',co:'동성종합물류(주) 대표',f:'010-3867-8858',status:'평생회원',spouse:'이병숙',dica:false},
-  {id:26,name:'김덕곤',rom:'KIM, DUCK-KON',role:'이사',group:'이사',b:'1953.8.4',j:'2001.7',co:'(주)엘앤케이파트너스 대표 · 부동산',f:'010-3851-1971',status:'평생회원',spouse:'심명순',dica:false},
-  {id:27,name:'신상일',rom:'SHIN, SANG-IL',role:'이사',group:'이사',b:'1958.8.23',j:'2001.8',co:'세무법인 세중 부곡지점 대표',f:'010-2664-3533',status:'평생회원',spouse:'심복남',dica:false},
-  {id:28,name:'김주석',rom:'KIM, JU-SEOK',role:'이사',group:'이사',b:'1958.7.18',j:'2001.11',co:'(주)하림에너지 대표',f:'010-3886-2980',status:'평생회원',spouse:'이혜정',dica:false},
-  {id:29,name:'최상호',rom:'CHOI, SANG-HO',role:'이사',group:'이사',b:'1953.9.25',j:'2005.5',co:'삼성수지 대표 · 중장비부품',f:'010-3598-6837',status:'평생회원',spouse:'허문자',dica:false},
-  {id:30,name:'신수범',rom:'SHIN, SOU-BHAM',role:'국제친선위원장·이사',group:'이사',b:'1966.6.5',j:'2002.12',co:'(주)부용쎈버개발 대표',f:'010-6369-2462',status:'평생회원 · 제55대 회장',spouse:'이미애',dica:false},
-  {id:31,name:'신성수',rom:'SHIN, SUNG-SOO',role:'전회장·이사',group:'이사',b:'1958.3.9',j:'2004.5',co:'한수산업(주) 대표 · 쇼트볼',f:'010-3593-2738',status:'전회장',spouse:'손순옥',dica:false},
-  {id:32,name:'김형출',rom:'KIM, HENG-CHUL',role:'체육레져위원장·이사',group:'이사',b:'1960.12.27',j:'2005.6',co:'(주)코리아애드 대표 · 광고',f:'010-3840-2266',status:'제58대 회장',spouse:'김점순',dica:false},
-  {id:33,name:'김인식',rom:'KIM, IN-SIK',role:'회무재정위원장·이사',group:'이사',b:'1965.4.7',j:'2005.6',co:'(주)아키센 건축사사무소 대표',f:'010-3832-5047',status:'제61대 회장',spouse:'박영옥',dica:false},
-  {id:34,name:'박송근',rom:'PARK, SONG-KEUN',role:'회원확장위원장·이사',group:'이사',b:'1959.2.29',j:'2005.11',co:'해양엔지니어링 대표 · 조선기자재',f:'010-3569-7801',status:'제57대 회장',spouse:'강보연',dica:false},
-  {id:35,name:'김귀동',rom:'KIM, GWI-DONG',role:'사업봉사위원장·이사',group:'이사',b:'1956.4.17',j:'2006.6',co:'포코그룹 회장 · 선박수리',f:'010-4106-1945',status:'제60대 회장',spouse:'장자옥',dica:false},
-  {id:36,name:'양기정',rom:'YANG, GI-JUNG',role:'이사',group:'이사',b:'1962.8.31',j:'2006.6',co:'다엔시스템키친 대표 · 씽크대',f:'010-3550-3539',status:'이사',spouse:'김관자',dica:false},
-  {id:37,name:'최성두',rom:'CHOI, SUNG-DU',role:'문화홍보위원장·이사',group:'이사',b:'1952.6.4',j:'2007.3',co:'(주)하나월드 대표 · 종합물류',f:'010-3889-5529',status:'제56대 회장',spouse:'김임순',dica:false},
-  {id:38,name:'정달근',rom:'JENG, DAL-KEUN',role:'이사',group:'이사',b:'1956.4.22',j:'2008.7',co:'(주)재화 대표 · 원양어업',f:'010-2294-7421',status:'회원',spouse:'이명화',dica:false},
-  {id:39,name:'정세현',rom:'JEONG, SE-HYUN',role:'경조친선위원장·이사',group:'이사',b:'1965.11.22',j:'2008.7',co:'(주)합천식품 대표 · 냉면류',f:'010-6245-2465',status:'제59대 회장',spouse:'박미숙',dica:false},
-  {id:40,name:'이기장',rom:'LEE, GI-JANG',role:'의전교육부위원장',group:'이사',b:'1965.10.11',j:'2008.7',co:'대경주택 대표 · 건축업',f:'010-8518-9008',status:'의전교육분과부위원장',spouse:'류미준',dica:false},
-  {id:41,name:'박치열',rom:'PARK, CHI-YEUL',role:'이사',group:'이사',b:'1952.10.2',j:'2008.12',co:'(주)대동메탈 대표 · 금속가공',f:'010-3583-1883',status:'회원',spouse:'유정숙',dica:false},
-  {id:42,name:'이현욱',rom:'LEE, HYUN-WOOK',role:'이사',group:'이사',b:'1962.7.18',j:'2010.2',co:'길로무역(주) 대표 · 무역/식품',f:'010-3852-3644',status:'제62대 회장',spouse:'지춘희',dica:false},
-  {id:43,name:'임승호',rom:'IM, SOONG-HO',role:'이사',group:'이사',b:'1963.2.11',j:'2011.1',co:'(주)한일원 대표',f:'010-3870-1188',status:'회원',spouse:'오영숙',dica:false},
-  {id:44,name:'곽대훈',rom:'KWAK, DAE-HUN',role:'직전회장',group:'이미포함',b:'',j:'',co:'',f:'',status:'',spouse:'',dica:false},
-  {id:45,name:'염주호',rom:'YEOM, JU-HO',role:'이사',group:'이사',b:'1971.5.28',j:'2015.10',co:'(주)골든브릿지 대표 · IT/여행',f:'010-4597-9091',status:'회원',spouse:'남지은',dica:false},
-  {id:46,name:'손인활',rom:'SON, IN-HWAL',role:'이사',group:'이사',b:'1968.12.17',j:'2016.6',co:'남해수산 대표',f:'010-3835-4907',status:'이사',spouse:'기봉선',dica:false},
-  {id:47,name:'조현철',rom:'CHO, HYUN-CHEOL',role:'감사',group:'감사',b:'1979.5.1',j:'2017.6',co:'(주)월드로직스틱 대표',f:'010-3577-9388',status:'감사',spouse:'김향미',dica:false},
-  {id:48,name:'김신근',rom:'KIM, SHIN-KEUN',role:'부총무',group:'이미포함',b:'',j:'',co:'',f:'',status:'',spouse:'',dica:false},
-  {id:49,name:'강호필',rom:'KANG, HO-PILL',role:'이사',group:'이사',b:'1964.11.19',j:'2023.10',co:'가람유치원 설립자',f:'010-2469-3050',status:'이사',spouse:'정경희',dica:false},
-  {id:50,name:'김동윤',rom:'KIM, DONG-UOON',role:'이사',group:'이사',b:'1979.1.18',j:'2023.11',co:'오션플래닛 대표 · 제조/연구',f:'010-5067-9747',status:'이사',spouse:'배경희',dica:false},
-  {id:51,name:'김근우',rom:'KIM, GEUN-WOO',role:'총무',group:'이미포함',b:'',j:'',co:'',f:'',status:'',spouse:'',dica:false},
-  {id:52,name:'박성민',rom:'PARK, SEONG-MIN',role:'라이온테마',group:'이미포함',b:'',j:'',co:'',f:'',status:'',spouse:'',dica:false},
-  {id:53,name:'김삼대',rom:'KIM, SAM-DAE',role:'이사',group:'이사',b:'1975.10.25',j:'2021.6',co:'금성테크(주) 대표 · 제조업',f:'010-3862-5853',status:'회원',spouse:'권지은',dica:false},
-  {id:54,name:'김병희',rom:'KIM, BYUNG-HEE',role:'이사',group:'이사',b:'1952.7.22',j:'2002.9',co:'(주)현대이엔엘 대표 · 전기공사',f:'010-3833-7353',status:'회원',spouse:'윤순옥',dica:false},
-  {id:55,name:'최규철',rom:'CHOI, KYU-CHUL',role:'이사',group:'이사',b:'1970.9.15',j:'2019.4',co:'가원엔지니어링 대표 · 건축설계',f:'010-8216-8025',status:'이사',spouse:'김지현',dica:false},
-  {id:56,name:'이무준',rom:'LEE, MU-JUN',role:'회무재정부위원장',group:'이사',b:'1974.8.27',j:'2020.1',co:'JJ모터스 대표 · 중고자동차',f:'010-5065-1111',status:'회무재정분과부위원장',spouse:'이은미',dica:false},
-  {id:57,name:'유희국',rom:'YU, HEE-GUK',role:'이사',group:'이사',b:'1954.11.7',j:'2020.7',co:'유일FA 대표 · 제조업',f:'010-4253-3655',status:'이사',spouse:'금정숙',dica:false},
-  {id:58,name:'김두석',rom:'KIM, DOO-SEOK',role:'제2부회장',group:'이미포함',b:'',j:'',co:'',f:'',status:'',spouse:'',dica:false},
-  {id:59,name:'김성태',rom:'KIM, SUNG-TAE',role:'감사',group:'감사',b:'1965.7.21',j:'2013.11',co:'(주)삼원산업 대표 · PVC밸브',f:'010-3592-1808',status:'감사',spouse:'장미희',dica:false},
-  {id:60,name:'김영주',rom:'KIM, YOUNG-JOO',role:'회원',group:'일반',b:'1992.11.23',j:'2024.7',co:'싹~다한우 식육식당',f:'010-5061-2979',status:'회원',spouse:'문수인',dica:false},
-  {id:61,name:'장무렬',rom:'JANG, MOO-RYEOL',role:'회원',group:'일반',b:'1974.11.4',j:'2025.6',co:'부산항운노조',f:'010-2471-6128',status:'회원',spouse:'금정화',dica:false},
-  {id:62,name:'이상조',rom:'LEE, SANG-JO',role:'회원',group:'일반',b:'1975.10.27',j:'2025.6',co:'효자동 솥뚜껑&보리밥 대표',f:'010-9617-1114',status:'회원',spouse:'조유진',dica:false},
-  {id:63,name:'황창길',rom:'HWANG, CHANG-KIL',role:'회원',group:'일반',b:'1973.10.15',j:'2025.6',co:'(주)동광전력 대표',f:'010-3840-2931',status:'회원',spouse:'박사련',dica:false},
-  {id:64,name:'곽승진',rom:'GWAK, SEUNG-JIN',role:'회원',group:'일반',b:'1992.5.31',j:'2025.6',co:'LG U+ 통신대리점 대표',f:'010-8080-3463',status:'회원',spouse:'서지연',dica:false},
-];
+var MONTHLY = {}, MONTHS = [], MEMBERS = [];
+var curFilter = 'all', selName = null, selMode = 'current';
+var CACHE_KEY = 'tl_cache_v1';
 
-// 중복 제거
-const MEMBERS_CLEAN = MEMBERS.filter((m,i,a) => m.name && m.f && a.findIndex(x=>x.name===m.name)===i);
-
-const KA = ['가','나','다','라','마','바','사','아','자','차','카','타','파','하'];
-
-function getInitial(name) {
-  if (!name) return '?';
-  const c = name.charCodeAt(0);
-  if (c < 0xAC00 || c > 0xD7A3) return name[0];
-  const idx = Math.floor((c - 0xAC00) / 588);
-  return KA[['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'].indexOf(
-    ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][idx]
-  )] || name[0];
+// ── 유틸 ──────────────────────────────────────────────────────
+function $(id){ return document.getElementById(id); }
+function toast(msg, type){
+  var t = $('toast'); t.textContent = msg;
+  t.className = 'toast show ' + (type || 'ok');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.classList.remove('show'); }, 3500);
 }
-
-// ===== 유틸 =====
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.style.display = 'block';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.style.display='none', 2200);
+function num(v){ var x = parseFloat(String(v==null?0:v).replace(/,/g,'')); return isNaN(x)?0:Math.round(x); }
+function won(v){ return (!v||v===0) ? '0원' : v.toLocaleString('ko-KR')+'원'; }
+function countDOW(y,m,dow){
+  var c=0, d=new Date(y,m-1,1);
+  while(d.getMonth()===m-1){ if(d.getDay()===dow)c++; d.setDate(d.getDate()+1); }
+  return c;
 }
-
-function avatar(name, gold=false, size=48) {
-  const ch = name ? name[0] : '?';
-  const bg = gold ? 'linear-gradient(135deg,var(--gold),#d4a017)' : 'linear-gradient(135deg,#2a4d8f,#1a3060)';
-  const color = gold ? 'var(--navy-d)' : '#fff';
-  const fs = Math.round(size * 0.35);
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:${color};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:800;flex-shrink:0">${ch}</div>`;
+function parseKeyStr(k){ var m=k.match(/(\d{4})[^\d](\d{1,2})/); return m?{year:+m[1],month:+m[2]}:null; }
+function toKey(y,m){ return y+'-'+(m<10?'0'+m:m); }
+function keyLabel(k){ var p=parseKeyStr(k); return p?p.month+'월':k; }
+function rollingStart(endKey){
+  var p=parseKeyStr(endKey); if(!p) return MONTHS[0];
+  var y=p.year, m=p.month-5; if(m<=0){m+=12;y--;}
+  return toKey(y,m);
 }
+function getLight(s){ return s>=70?'Green':s>=50?'Amber':s>=30?'Red':'Grey'; }
+function lkor(l){ return {Green:'🟢 그린',Amber:'🟡 앰버',Red:'🔴 레드',Grey:'⬛ 그레이'}[l]; }
+function lcolor(l){ return {Green:'var(--g)',Amber:'var(--a)',Red:'var(--r)',Grey:'var(--gr)'}[l]; }
 
-// ===== 네비게이션 =====
-let currentTab = 'home';
-
-function openApp() {
-  document.getElementById('cover').style.display = 'none';
-  const main = document.getElementById('main');
-  main.style.display = 'flex';
-  showTab('home');
+// ── 구글시트 gviz 파싱 ─────────────────────────────────────────
+function gvizUrl(sheetName){
+  return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+         '/gviz/tq?tqx=out:json&headers=0&sheet=' + encodeURIComponent(sheetName) +
+         '&_ts=' + Date.now();
 }
-
-function showTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  const screens = document.getElementById('screens');
-  screens.innerHTML = '';
-  const div = document.createElement('div');
-  div.className = 'screen';
-  div.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column';
-  screens.appendChild(div);
-  if (tab==='home') renderHome(div);
-  else if (tab==='members') renderMembers(div);
-  else if (tab==='exec') renderExec(div);
-  else if (tab==='rules') renderRules(div);
-  else if (tab==='history') renderHistory(div);
+function parseGvizText(txt){
+  var a = txt.indexOf('('), b = txt.lastIndexOf(')');
+  if(a<0 || b<0) throw new Error('gviz 형식 아님');
+  var obj = JSON.parse(txt.slice(a+1, b));
+  if(obj.status !== 'ok') throw new Error('sheet-missing');
+  return obj.table;
 }
-
-function showMember(id) {
-  const m = MEMBERS_CLEAN.find(x => x.id === id);
-  if (!m) return;
-  const screens = document.getElementById('screens');
-  const div = document.createElement('div');
-  div.className = 'screen';
-  div.style.cssText = 'position:absolute;inset:0;z-index:10;display:flex;flex-direction:column';
-  screens.appendChild(div);
-  renderMemberCard(div, m);
+function cellVal(row, i){
+  if(!row || !row.c || !row.c[i]) return '';
+  var c = row.c[i];
+  return c.v == null ? '' : c.v;
 }
-
-// ===== 홈 =====
-function renderHome(el) {
-  el.innerHTML = `
-  <div class="appbar">
-    <div>
-      <div class="appbar-title">부산라이온스클럽</div>
-      <div class="appbar-sub">제65대 · 2024 – 2025</div>
-    </div>
-  </div>
-  <div class="scroll" style="padding-bottom:24px">
-    <div style="margin:16px;border-radius:18px;background:linear-gradient(135deg,#1c3e72,#0e2140);color:#fff;padding:20px">
-      <div style="font-size:11px;color:var(--gold-l);letter-spacing:2px;font-weight:600">CLUB SLOGAN</div>
-      <div style="font-size:21px;font-weight:800;margin-top:8px;line-height:1.35">자유 · 지성<br>우리 국가의 안전</div>
-      <div style="font-size:11px;color:rgba(247,230,173,.7);margin-top:6px">Liberty · Intelligence · Our Nation's Safety</div>
-      <div style="display:inline-block;margin-top:12px;padding:6px 14px;border-radius:20px;background:rgba(240,192,64,.16);border:1px solid rgba(240,192,64,.35);font-size:13px;font-weight:700;color:var(--gold);letter-spacing:3px">WE SERVE</div>
-    </div>
-
-    <div onclick="showMember(1)" style="margin:0 16px 18px;border-radius:16px;background:var(--card);border:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
-      ${avatar('허',true,56)}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:11px;color:var(--gold-d);font-weight:700">제65대 회장 · 회장지침</div>
-        <div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:3px;line-height:1.3;word-break:keep-all">${CLUB.presidentGuide}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:3px">회장 <b style="color:var(--ink)">허광탁</b> L</div>
-      </div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round"/></svg>
-    </div>
-
-    <div class="section-label">클럽 기본정보</div>
-    <div class="card">
-      <div class="row"><div><div class="row-label">클럽 번호</div><div class="row-val">${CLUB.no} · ${CLUB.district}</div></div></div>
-      <div class="row"><div><div class="row-label">조직총회 / 헌장의 밤</div><div class="row-val">${CLUB.founded} · ${CLUB.charter}</div></div></div>
-      <div class="row"><div><div class="row-label">정기 회합</div><div class="row-val">이사회 ${CLUB.board} · 월례회 ${CLUB.monthly}</div></div></div>
-      <div class="row"><div style="flex:1"><div class="row-label">클럽 사무국</div><div class="row-val">${CLUB.addr}</div></div></div>
-      <div class="row" onclick="window.location.href='tel:0516347288'" style="cursor:pointer">
-        <div style="flex:1"><div class="row-label">전화</div><div class="row-val" style="color:var(--navy)">${CLUB.tel}</div></div>
-        <span style="font-size:12px;color:var(--navy);font-weight:600">전화걸기</span>
-      </div>
-      <div class="row"><div><div class="row-label">팩스</div><div class="row-val">${CLUB.fax}</div></div></div>
-      <div class="row" onclick="window.location.href='mailto:${CLUB.email}'" style="cursor:pointer">
-        <div style="flex:1"><div class="row-label">이메일</div><div class="row-val" style="color:var(--navy)">${CLUB.email}</div></div>
-        <span style="font-size:12px;color:var(--navy);font-weight:600">메일</span>
-      </div>
-    </div>
-
-    <div class="section-label">회비 · 봉사금 납부</div>
-    <div style="margin:0 16px 18px;border-radius:16px;background:linear-gradient(135deg,#1c3e72,#122a51);padding:18px">
-      <div style="font-size:12px;color:var(--gold-l);font-weight:600;letter-spacing:.5px">회비 및 봉사금 계좌</div>
-      <div style="font-size:21px;font-weight:800;color:#fff;margin-top:10px;letter-spacing:.5px">${CLUB.bank}</div>
-      <div style="font-size:13px;color:rgba(247,230,173,.8);margin-top:6px">${CLUB.bankHolder}</div>
-      <button onclick="navigator.clipboard&&navigator.clipboard.writeText('${CLUB.bank}').then(()=>showToast('계좌번호가 복사됐어요'));return false" style="margin-top:14px;height:46px;width:100%;border-radius:12px;background:var(--gold);color:var(--navy-d);font-size:15px;font-weight:800;border:none;cursor:pointer">계좌번호 복사하기</button>
-    </div>
-
-    <div class="section-label">2024 – 2025 지표</div>
-    <div class="card" style="margin-bottom:6px">
-      <div class="row"><div><div class="row-label">국제회장 · ${CLUB.intlPresident}</div><div class="row-val">${CLUB.intlTheme}</div></div></div>
-      <div class="row"><div><div class="row-label">355-A지구 총재 · ${CLUB.governor}</div><div class="row-val">${CLUB.governorTheme}</div></div></div>
-    </div>
-  </div>`;
-}
-
-// ===== 회원 명부 =====
-function renderMembers(el) {
-  const sorted = [...MEMBERS_CLEAN].sort((a,b) => {
-    const ia = KA.indexOf(getInitial(a.name));
-    const ib = KA.indexOf(getInitial(b.name));
-    if (ia !== ib) return (ia<0?99:ia)-(ib<0?99:ib);
-    return a.name.localeCompare(b.name,'ko');
+// gviz table → 2차원 배열 (헤더가 cols.label에 흡수된 경우 복원)
+function tableToRows(table){
+  var rows = [];
+  var hasLabels = (table.cols||[]).some(function(c){ return c.label && String(c.label).trim() !== ''; });
+  if(hasLabels){
+    rows.push(table.cols.map(function(c){ return c.label || ''; }));
+  }
+  (table.rows||[]).forEach(function(r){
+    var arr = [];
+    for(var i=0;i<table.cols.length;i++) arr.push(cellVal(r,i));
+    rows.push(arr);
   });
-
-  el.innerHTML = `
-  <div class="appbar">
-    <div>
-      <div class="appbar-title">회원 명부</div>
-      <div class="appbar-sub">정회원 ${MEMBERS_CLEAN.length}명</div>
-    </div>
-  </div>
-  <div style="padding:12px 16px 8px;background:var(--paper);flex-shrink:0">
-    <input id="member-search" class="search-box" placeholder="이름 · 직책 · 회사 검색" oninput="filterMembers(this.value)" autocomplete="off"/>
-  </div>
-  <div style="flex:1;display:flex;min-height:0;position:relative">
-    <div id="member-list" class="scroll" style="flex:1;padding-bottom:20px;padding-right:28px"></div>
-    <div id="index-rail" style="position:absolute;right:0;top:0;bottom:0;width:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"></div>
-  </div>`;
-
-  window._membersSorted = sorted;
-  renderMemberList(sorted);
-  buildIndexRail(sorted);
+  return rows;
 }
+var JUNK_NAMES = ['비지터','BNI','합','합계','계','총계','한글이름순','영어이름순'];
+function parseMonthRows(rows, y, m){
+  if(!rows || rows.length < 2) return null;
+  // 헤더 행 찾기: '멤버' 또는 '이름' 포함
+  var hi = -1;
+  for(var r=0; r<Math.min(rows.length,4); r++){
+    var joined = rows[r].map(function(v){return String(v);}).join('|');
+    if(joined.indexOf('멤버')>=0 || joined.indexOf('이름')>=0 || joined.indexOf('출석')>=0){ hi=r; break; }
+  }
+  if(hi<0) return null;
+  var hd = rows[hi].map(function(v){ return String(v||'').trim(); });
+  function fi(keys){
+    for(var i=0;i<hd.length;i++)
+      for(var j=0;j<keys.length;j++)
+        if(hd[i].indexOf(keys[j])>=0) return i;
+    return -1;
+  }
+  var idx = {
+    name: fi(['멤버','이름','First']),
+    P: fi(['출석','P ']), A: fi(['결석','A ']), L: fi(['지각','L ']),
+    M: fi(['병가','M ']), S: fi(['대리','S ']),
+    RGI: fi(['준 T1','준T1','RGI']), RGO: fi(['준 T2','준T2','RGO']),
+    V: fi(['비지터','V ']), M121: fi(['1-2-1','121','원투원']),
+    N: fi(['감사장','Value of Business','Value']), O: fi(['CEU','교육','Training'])
+  };
+  if(idx.name<0 || idx.P<0) return null;
 
-function renderMemberList(list) {
-  const container = document.getElementById('member-list');
-  if (!container) return;
-
-  // 그룹핑
-  const groups = {};
-  list.forEach(m => {
-    const k = getInitial(m.name);
-    (groups[k] = groups[k]||[]).push(m);
-  });
-
-  let html = '';
-  KA.forEach(k => {
-    if (!groups[k]) return;
-    html += `<div id="group-${k}" style="scroll-margin-top:8px">
-      <div style="position:sticky;top:0;z-index:1;background:var(--paper-d);padding:5px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)">
-        <span style="font-size:15px;font-weight:800;color:var(--navy)">${k}</span>
-        <span style="font-size:12px;color:var(--muted)">${groups[k].length}</span>
-      </div>`;
-    groups[k].forEach(m => {
-      html += `<button onclick="showMember(${m.id})" style="width:100%;display:flex;align-items:center;padding:11px 14px;gap:12px;text-align:left;border:none;border-bottom:1px solid var(--line);background:none;cursor:pointer">
-        ${avatar(m.name, m.id===1, 46)}
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:7px">
-            <span style="font-size:17px;font-weight:700;color:var(--ink)">${m.name}</span>
-            ${m.group==='집행부'?`<span class="badge badge-exec">${m.role}</span>`:''}
-          </div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.status||'회원'}${m.co?' · '+m.co.split(' · ')[0]:''}</div>
-        </div>
-        <div style="flex-shrink:0;text-align:right">
-          <div style="font-size:11px;color:var(--muted)">${m.j} 입회</div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-top:3px"><path d="M9 5l7 7-7 7" stroke="#bbb" stroke-width="2.2" stroke-linecap="round"/></svg>
-        </div>
-      </button>`;
+  var members = [];
+  for(var r2=hi+1; r2<rows.length; r2++){
+    var row = rows[r2];
+    var raw = String(row[idx.name]||'').trim();
+    if(!raw || raw==='0') continue;
+    var kor = raw.split(/\s+/)[0].trim();
+    if(kor.length<2) continue;
+    if(JUNK_NAMES.indexOf(kor)>=0 || JUNK_NAMES.indexOf(raw)>=0) continue;
+    if(!/[가-힣]{2,}/.test(kor)) continue; // 한글 이름만 (집계행 제외)
+    members.push({
+      name:kor, full:raw,
+      P:num(row[idx.P]), A:num(row[idx.A]), L:num(row[idx.L]),
+      M:num(row[idx.M]), S:num(row[idx.S]),
+      RGI:num(row[idx.RGI]), RGO:num(row[idx.RGO]),
+      V:num(row[idx.V]), M121:num(row[idx.M121]),
+      N:num(row[idx.N]), O:num(row[idx.O])
     });
-    html += `</div>`;
+  }
+  if(!members.length) return null;
+
+  // 실제 진행 주수 = 출결합계 최빈값 (공휴일 자동 반영)
+  var totals = members.map(function(mb){return mb.P+mb.A+mb.L+mb.M+mb.S;}).filter(function(v){return v>0;});
+  var fw = countDOW(y,m,DOW);
+  var actualWeeks = fw;
+  if(totals.length>0){
+    var freq={}; totals.forEach(function(v){freq[v]=(freq[v]||0)+1;});
+    actualWeeks = parseInt(Object.keys(freq).sort(function(a,b){return freq[b]-freq[a];})[0]);
+  }
+  return {
+    year:y, month:m, members:members,
+    actualWeeks:actualWeeks, fullWeeks:fw,
+    remainWeeks:Math.max(0, fw-actualWeeks)
+  };
+}
+
+// ── 동기화 (구글시트 → localStorage) ───────────────────────────
+function candidateMonths(){
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth()+1;
+  // 다음 달부터 과거로 PROBE_BACK개월
+  m++; if(m>12){m=1;y++;}
+  var list = [];
+  for(var i=0;i<=PROBE_BACK;i++){
+    list.push({y:y, m:m});
+    m--; if(m<1){m=12;y--;}
+  }
+  return list;
+}
+function fetchMonth(y, m){
+  var padded = toKey(y,m);                 // 2026-05
+  var unpadded = y + '-' + m;              // 2026-5
+  function tryName(name){
+    return fetch(gvizUrl(name)).then(function(res){
+      if(!res.ok) throw new Error('http '+res.status);
+      return res.text();
+    }).then(function(txt){
+      return parseMonthRows(tableToRows(parseGvizText(txt)), y, m);
+    });
+  }
+  return tryName(padded).catch(function(){ return tryName(unpadded); }).catch(function(){ return null; });
+}
+function syncFromSheet(){
+  setSyncUI('loading');
+  var cands = candidateMonths();
+  return Promise.all(cands.map(function(c){ return fetchMonth(c.y, c.m); }))
+    .then(function(results){
+      var monthly = {};
+      results.forEach(function(md){ if(md) monthly[toKey(md.year, md.month)] = md; });
+      var keys = Object.keys(monthly).sort();
+      if(!keys.length) throw new Error('시트에서 유효한 탭을 찾지 못했어요');
+      // 최신 달 기준 6개월 + 여유만 유지
+      var latest = keys[keys.length-1];
+      var start = rollingStart(latest);
+      keys.forEach(function(k){ if(k < start) delete monthly[k]; });
+      var cache = { ts: Date.now(), monthly: monthly };
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e){}
+      applyData(cache, true);
+      return true;
+    });
+}
+function loadCache(){
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+function applyData(cache, fresh){
+  MONTHLY = cache.monthly;
+  MONTHS = Object.keys(MONTHLY).sort();
+  var last = MONTHS[MONTHS.length-1];
+  MEMBERS = MONTHLY[last].members.map(function(m){return m.name;});
+  $('loadbox').style.display = 'none';
+  $('dbar').style.display = 'block';
+  $('pview').style.display = 'block';
+  $('syncbar').style.display = 'flex';
+  setSyncUI(fresh?'fresh':'cached', cache.ts);
+  updateDbar(); renderStats(); renderTable(); renderChips();
+  if(selName){ buildPbtns(); updatePersonal(); }
+}
+function fmtTs(ts){
+  var d = new Date(ts);
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+function setSyncUI(state, ts){
+  var bar=$('syncbar'), ico=$('syncico'), txt=$('synctxt');
+  if(state==='loading'){ bar.className='sync on'; ico.textContent='🔄'; txt.textContent='구글시트에서 최신 데이터 받는 중...'; return; }
+  if(state==='fresh'){ bar.className='sync on'; ico.textContent='✅'; txt.textContent='최신 동기화 완료 ('+fmtTs(ts)+')'; return; }
+  if(state==='cached'){ bar.className='sync off'; ico.textContent='📴'; txt.innerHTML='오프라인 — <b>'+fmtTs(ts)+'</b> 동기화 데이터로 작동 중'; return; }
+  bar.className='sync err'; ico.textContent='⚠️'; txt.textContent = ts || '동기화 실패';
+  bar.style.display='flex';
+}
+function boot(){
+  var cache = loadCache();
+  if(cache){ applyData(cache, false); } // 캐시 먼저 즉시 표시 (오프라인 보장)
+  if(navigator.onLine === false){
+    if(!cache){
+      $('loadbox').innerHTML = '<div class="loadbox-icon">📴</div><div class="loadbox-t">오프라인 상태예요</div><div class="loadbox-s">처음 한 번은 인터넷에 연결한 뒤 앱을 열어 주세요.<br>그 후엔 오프라인에서도 작동합니다.</div>';
+    }
+    return;
+  }
+  syncFromSheet().catch(function(err){
+    if(cache){ setSyncUI('cached', cache.ts); toast('동기화 실패 — 저장된 데이터로 표시 중', 'err'); }
+    else {
+      $('loadbox').innerHTML = '<div class="loadbox-icon">⚠️</div><div class="loadbox-t">데이터를 불러오지 못했어요</div><div class="loadbox-s">'+err.message+'<br><br>구글시트 공유가 「링크가 있는 모든 사용자 — 뷰어」인지 확인해 주세요.</div>';
+    }
   });
-
-  if (!html) html = `<div style="text-align:center;color:var(--muted);margin-top:60px;font-size:16px">검색 결과가 없습니다</div>`;
-  container.innerHTML = html;
 }
-
-function buildIndexRail(list) {
-  const rail = document.getElementById('index-rail');
-  if (!rail) return;
-  const present = new Set(list.map(m => getInitial(m.name)));
-  rail.innerHTML = KA.map(k => `
-    <button class="idx-btn${!present.has(k)?' disabled':''}" onclick="${present.has(k)?`jumpToGroup('${k}')`:'void 0'}">${k}</button>
-  `).join('');
-}
-
-function jumpToGroup(k) {
-  const el = document.getElementById('group-'+k);
-  const list = document.getElementById('member-list');
-  if (el && list) list.scrollTo({top: el.offsetTop - 8, behavior:'smooth'});
-}
-
-function filterMembers(q) {
-  const kw = q.trim().toLowerCase();
-  const filtered = kw
-    ? window._membersSorted.filter(m => (m.name+m.role+m.co+m.status+(m.rom||'')).toLowerCase().includes(kw))
-    : window._membersSorted;
-  renderMemberList(filtered);
-  if (!kw) buildIndexRail(filtered);
-  else document.getElementById('index-rail').innerHTML = '';
-}
-
-// ===== 회원 카드 =====
-function renderMemberCard(el, m) {
-  const dica = m.dica;
-  el.innerHTML = `
-  <div class="appbar">
-    <button class="appbar-back" onclick="this.closest('.screen').remove()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-    <div class="appbar-title">회원 카드</div>
-  </div>
-  <div class="scroll" style="padding-bottom:30px">
-    <div class="card-hero">
-      ${avatar(m.name, true, 68)}
-      <div style="flex:1;min-width:0">
-        <div class="card-name">${m.name}</div>
-        <div class="card-rom">${m.rom||''}</div>
-        <div class="card-role-badge">${m.role||''}</div>
-        ${dica?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--gold);font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" fill="currentColor"/></svg>DiCA 명함 있음</div>':''}
-      </div>
-    </div>
-
-    <div style="padding:14px 16px 0">
-      ${m.status?`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><div class="row-label">구분</div><div class="row-val">${m.status}</div></div></div>`:''}
-      ${m.co?`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><div class="row-label">직업 / 소속</div><div class="row-val">${m.co}</div></div></div>`:''}
-      ${m.b?`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><div class="row-label">생년월일</div><div class="row-val">${m.b}</div></div></div>`:''}
-      ${m.j?`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><div class="row-label">입회연도</div><div class="row-val">${m.j}</div></div></div>`:''}
-      ${m.spouse?`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><div class="row-label">배우자</div><div class="row-val">${m.spouse}</div></div></div>`:''}
-      ${m.f?`<div class="row" style="padding:10px 0" onclick="window.location.href='tel:${m.f.replace(/[^0-9]/g,'')}'" style="cursor:pointer">
-        <div style="flex:1"><div class="row-label">휴대폰</div><div class="row-val" style="color:var(--navy);font-size:18px;font-weight:700">${m.f}</div></div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h3l1.6 4.2-2 1.4a12 12 0 005.8 5.8l1.4-2L19 17v3a1 1 0 01-1 1A15 15 0 014 6a1 1 0 011-1z" fill="var(--navy)"/></svg>
-      </div>`:''}
-    </div>
-
-    <div style="padding:16px">
-      ${dica?`<button onclick="showToast('DiCA 명함으로 이동합니다')" class="btn-primary btn-gold" style="margin-bottom:10px">디지털 명함 보기 →</button>`:''}
-      ${m.f?`<button onclick="window.location.href='tel:${m.f.replace(/[^0-9]/g,'')}'" class="btn-primary" style="${dica?'':''}">📞 전화 연결</button>`:''}
-    </div>
-  </div>`;
-}
-
-// ===== 집행부 =====
-function renderExec(el) {
-  el.innerHTML = `
-  <div class="appbar">
-    <div>
-      <div class="appbar-title">집행부</div>
-      <div class="appbar-sub">2024 – 2025 제65대</div>
-    </div>
-  </div>
-  <div class="scroll" style="padding-bottom:24px">
-    <div class="section-label">회장단</div>
-    ${execChief(1,'회장','허광탁')}
-    ${execChief(2,'직전회장','곽대훈')}
-
-    <div class="section-label" style="margin-top:4px">총무 · 재무</div>
-    <div class="two-col">
-      ${execMini(4,'총무','김근우')}
-      ${execMini(5,'재무','양승현')}
-      ${execMini(6,'라이온테마','박성민')}
-      ${execMini(7,'테일튀스터','장영민')}
-      ${execMini(8,'부총무','김신근')}
-      ${execMini(9,'부재무','임행수')}
-    </div>
-
-    <div class="section-label" style="margin-top:4px">이사</div>
-    <div class="two-col">
-      ${execMini(17,'이사','박호석')}
-      ${execMini(31,'이사','신성수')}
-      ${execMini(29,'이사','최상호')}
-      ${execMini(45,'이사','염주호')}
-      ${execMini(36,'이사','양기정')}
-      ${execMini(57,'이사','유희국')}
-      ${execMini(49,'이사','강호필')}
-      ${execMini(50,'이사','김동윤')}
-      ${execMini(55,'이사','최규철')}
-      ${execMini(53,'이사','김삼대')}
-    </div>
-
-    <div class="section-label" style="margin-top:4px">분과위원장</div>
-    <div class="two-col">
-      ${execMini(39,'경조친선','정세현')}
-      ${execMini(30,'국제친선','신수범')}
-      ${execMini(34,'회원확장','박송근')}
-      ${execMini(35,'사업봉사','김귀동')}
-      ${execMini(32,'체육레져','김형출')}
-      ${execMini(18,'의전교육','박시윤')}
-      ${execMini(33,'회무재정','김인식')}
-      ${execMini(37,'문화홍보','최성두')}
-    </div>
-
-    <div class="section-label" style="margin-top:4px">감사</div>
-    <div class="two-col">
-      ${execMini(59,'감사','김성태')}
-      ${execMini(47,'감사','조현철')}
-    </div>
-  </div>`;
-}
-
-function execChief(id, role, name) {
-  return `<div onclick="showMember(${id})" style="margin:0 16px 10px;border-radius:16px;background:var(--card);border:2px solid var(--navy);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
-    ${avatar(name,true,52)}
-    <div style="flex:1">
-      <div style="font-size:12px;color:var(--gold-d);font-weight:700">${role}</div>
-      <div style="font-size:20px;font-weight:800;color:var(--ink);margin-top:2px">${name}</div>
-    </div>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round"/></svg>
-  </div>`;
-}
-
-function execMini(id, role, name) {
-  return `<div onclick="showMember(${id})" class="exec-mini" style="cursor:pointer">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      ${avatar(name,false,32)}
-      <div>
-        <div class="exec-mini-role">${role}</div>
-        <div class="exec-mini-name">${name}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ===== 규정 =====
-const REGS = {
-  '윤리강령': `<div class="reg-content">
-    <div class="reg-h1">라이온스 윤리강령</div>
-    <ol style="padding-left:20px;line-height:2">
-      <li>자기직업에 긍지를 가지고 근면 성실하여 힘써 사회에 봉사한다.</li>
-      <li>부정한 이득을 배제하고 정당한 방법으로 성공을 기도한다.</li>
-      <li>남을 해하지 아니하고 자기 직무에 충실히 임한다.</li>
-      <li>남을 의심하기 전에 먼저 자기를 반성한다.</li>
-      <li>우의를 돈독하게 하며 이를 이용하지 아니한다.</li>
-      <li>선량한 시민으로서 자기 의무를 다하며 국가, 민족, 사회의 발전을 위하여 노력한다.</li>
-      <li>불행한 사람을 위로하고 약한 사람을 도와준다.</li>
-      <li>남을 비판하는데 조심하고 칭찬하는데 인색하지 아니하며 모든 문제를 건설적인 방향으로 추진한다.</li>
-    </ol>
-  </div>`,
-
-  '헌장·부칙': `<div class="reg-content">
-    <div class="reg-h1">헌장 및 부칙</div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">(2025년 5월 19일 개정)</p>
-    <div class="reg-h2">제1장 총칙</div>
-    <p><b>제1조(명칭)</b> 본 클럽은 국제라이온스협회 355-A(부산)지구 부산라이온스클럽이라 칭하며, 국제라이온스협회로부터 헌장을 받아 그 관리 하에 있다.</p>
-    <p style="margin-top:10px"><b>제2조(슬로건, 모토)</b> 본 클럽의 슬로건은 자유, 지성, 우리 국가의 안전(liberty, intelligence, our nation safety)로 하며, 모토는 "우리는 봉사한다"(we serve)로 한다.</p>
-    <p style="margin-top:10px"><b>제3조(목적과 목표)</b> 세계 제 민족 상호간에 이해심을 가꾸고 증진시키며, 건전한 국가정신과 시민의식을 고취시키고, 지역사회의 복지향상을 위하여 노력한다.</p>
-    <div class="reg-h2" style="margin-top:18px">제2장 회원</div>
-    <p><b>제4조(자격)</b> 선량한 덕성과 지역사회에서 덕망있는 법적성인으로 구성된다.</p>
-    <p style="margin-top:10px"><b>제5조(회원의 구분)</b> 정회원 · 자유회원 · 명예회원 · 우대회원 · 평생회원 · 원로회원으로 구분한다.</p>
-    <p style="margin-top:10px"><b>제9조(제명)</b> 정기 월례회에 정당한 사유없이 연4회 이상 불참할 시, 정당한 사유의 보고없이 년간 제의무금 미납 시, 회의 또는 행사장에서 폭력행위를 할 시 이사회의 결의로 제명할 수 있다.</p>
-    <div class="reg-h2" style="margin-top:18px">제3장 임원</div>
-    <p><b>제13조(임원의 구성)</b> 본 클럽의 임원은 회장, 직전회장, 제1부회장, 제2부회장, 제3부회장, 총무, 재무, L.T, T.T, 이사, 감사 및 분과위원장, 장학위원장을 포함한다.</p>
-    <div class="reg-h2" style="margin-top:18px">제4장 회의</div>
-    <p><b>제18조(월례회)</b> 정기 월례회는 매월 18일 이사회가 정한 장소에서 개최하되 공휴일인 경우 익일로 한다.</p>
-    <p style="margin-top:10px"><b>제20조(이사회)</b> 이사회는 특별한 경우를 제외하고 매월 3일로 하되, 공휴일인 경우 익일로 한다.</p>
-    <div class="reg-h2" style="margin-top:18px">제5장 재정</div>
-    <p><b>제28조(회계년도)</b> 본 클럽의 회계연도는 7월 1일부터 익년 6월 30일까지로 한다.</p>
-    <p style="margin-top:10px"><b>제30조(회비)</b> 입회비, 월례회비, 이사회비, 의무봉사금 등은 당해연도 이사회 결의에 따른다. 모든 회비 및 의무봉사금은 매 회기년도 초(매년 10월말 이전)까지 납부해야 한다.</p>
-  </div>`,
-
-  'L.I.O.N.S': `<div class="reg-content">
-    <div class="reg-h1">L.I.O.N.S 상징</div>
-    <div style="display:grid;gap:12px;margin-top:12px">
-      ${['L — Liberty (자유)','I — Intelligence (지성)','O — Our (우리)','N — Nation\'s (국가의)','S — Safety (안전)'].map(s=>`<div style="padding:14px 16px;background:linear-gradient(135deg,#1c3e72,#0e2140);color:#fff;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.5px">${s}</div>`).join('')}
-    </div>
-    <div class="reg-h2" style="margin-top:20px">엠블럼 색상의 의미</div>
-    <p><b>보라색</b> — 국가, 친구, 자기자신, 특히 양심에 충실함을 의미한다.</p>
-    <p style="margin-top:8px"><b>황금색</b> — 청렴한 생활, 진지한 의지, 정확한 판단, 관대한 마음으로 사람을 접한다는 의미이다.</p>
-    <p style="margin-top:8px"><b>보라와 황금색의 배색</b> — 협조와 도야, 계몽과 호응, 개혁을 의미한다.</p>
-  </div>`,
-
-  '클럽 노래': `<div class="reg-content">
-    <div class="reg-h1">부산라이온스클럽 노래</div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">작사 박근식 · 작곡 김진호</p>
-    <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--line);line-height:2">
-      <b>1절</b><br>
-      높고 깊은 우리 뜻은 사회봉사 위하여<br>
-      다같이 한데 뭉쳐 정성모아 일하세<br>
-      라이온스 라이온스 우리 부산 라이온<br>
-      소리높여 노래하자 발맞추어 나가리<br><br>
-      <b>2절</b><br>
-      높고 깊은 우리 뜻은 세계평화 위하여<br>
-      힘을 모아 이룩하세 인류사회 복되게<br>
-      라이온스 라이온스 우리 부산 라이온<br>
-      소리높여 노래하자 희망차게 나가리
-    </div>
-  </div>`,
-
-  '경조규정': `<div class="reg-content">
-    <div class="reg-h1">경조 규정</div>
-    <div class="reg-h2">흉사</div>
-    <ul style="padding-left:16px;line-height:2">
-      <li>라이온 본인 사망 시 — 조의금 300,000원, 조화 1점</li>
-      <li>네스(부인) 사망 시 — 조의금 200,000원, 조화 1점</li>
-      <li>부모 및 처 부모, 자녀 사망 시 — 조의금 200,000원, 조화 1점</li>
-      <li>조부모 사망 시 — 조의금 100,000원, 조화 1점</li>
-    </ul>
-    <div class="reg-h2" style="margin-top:14px">길사</div>
-    <ul style="padding-left:16px;line-height:2">
-      <li>라이온 본인 칠순, 팔순 시 — 화환 1점</li>
-      <li>자녀 결혼 시 — 축의금 200,000원, 화환 1점</li>
-      <li>자녀 돌기념 — 100,000원 또는 꽃바구니 1점</li>
-      <li>개업(이전·확장) 및 취임식 — 화환 1점</li>
-    </ul>
-  </div>`
+$('syncbtn').onclick = function(){
+  if(navigator.onLine === false){ toast('인터넷 연결이 없어요. 저장된 데이터로 계속 작동합니다.', 'err'); return; }
+  syncFromSheet().then(function(){ toast('✅ 최신 데이터로 갱신됐어요'); })
+    .catch(function(e){ var c=loadCache(); if(c) setSyncUI('cached', c.ts); toast('동기화 실패: '+e.message, 'err'); });
 };
 
-let currentRegTab = '윤리강령';
-
-function renderRules(el) {
-  const tabs = Object.keys(REGS);
-  el.innerHTML = `
-  <div class="appbar">
-    <div>
-      <div class="appbar-title">헌장 · 규정</div>
-      <div class="appbar-sub">부산라이온스클럽</div>
-    </div>
-  </div>
-  <input id="reg-search" class="search-box" placeholder="규정 내 검색..." oninput="searchReg(this.value)" autocomplete="off" style="margin-top:10px"/>
-  <div class="tab-row">
-    ${tabs.map(t=>`<button class="reg-tab${t===currentRegTab?' active':''}" onclick="switchRegTab('${t}')" id="rtab-${t.replace(/[^a-zA-Z가-힣]/g,'_')}">${t}</button>`).join('')}
-  </div>
-  <div id="reg-body" class="scroll">${REGS[currentRegTab]}</div>`;
-}
-
-function switchRegTab(t) {
-  currentRegTab = t;
-  document.querySelectorAll('.reg-tab').forEach(b => b.classList.remove('active'));
-  const safe = t.replace(/[^a-zA-Z가-힣]/g,'_');
-  const btn = document.getElementById('rtab-'+safe);
-  if (btn) btn.classList.add('active');
-  document.getElementById('reg-body').innerHTML = REGS[t];
-  document.getElementById('reg-search').value = '';
-}
-
-function searchReg(q) {
-  const kw = q.trim();
-  const body = document.getElementById('reg-body');
-  if (!kw) { body.innerHTML = REGS[currentRegTab]; return; }
-  let html = REGS[currentRegTab];
-  const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
-  body.innerHTML = html.replace(re, m => `<mark class="highlight">${m}</mark>`);
-}
-
-// ===== 연혁 =====
-const HISTORY = [
-  {year:'2024–2025',gen:'제65대',president:'허광탁',guide:'다 함께 행복한 나눔 봉사!',officers:'총무 김근우 · 재무 양승현 · L.T 박성민 · T.T 장영민',current:true},
-  {year:'2023–2024',gen:'제64대',president:'곽대훈',guide:'',officers:'총무 김두석 · 재무 조현철 · L.T 이무준 · T.T 채현식'},
-  {year:'2022–2023',gen:'제63대',president:'김영대',guide:'',officers:'총무 손인활 · 재무 곽대훈 · L.T 양승현 · T.T 이청원'},
-  {year:'2021–2022',gen:'제62대',president:'이현욱',guide:'',officers:'총무 곽대훈 · 재무 임행수 · L.T 조현철 · T.T 이무준'},
-  {year:'2020–2021',gen:'제61대',president:'김인식',guide:'',officers:'총무 양승현 · 재무 곽대훈 · L.T 손인활 · T.T 조현철'},
-  {year:'2019–2020',gen:'제60대',president:'김귀동',guide:'',officers:'총무 김근우 · 재무 허광탁 · L.T 임행수 · T.T 손인활'},
-  {year:'2018–2019',gen:'제59대',president:'정세현',guide:'',officers:'총무 손인활 · 재무 임행수 · L.T 곽대훈 · T.T 김병도'},
-  {year:'2017–2018',gen:'제58대',president:'김형출',guide:'',officers:'총무 이현욱 · 재무 송우근 · L.T 성윤경 · T.T 양기정'},
-  {year:'2016–2017',gen:'제57대',president:'박송근',guide:'',officers:'총무 성경우 · 재무 김성태 · L.T 임행수 · T.T 박정옥'},
-  {year:'2015–2016',gen:'제56대',president:'최성두',guide:'',officers:'총무 최기권 · 재무 허광탁 · L.T 임승호 · T.T 임행수'},
-  {year:'2014–2015',gen:'제55대',president:'신수범',guide:'',officers:'총무 정세현 · 재무 송우근 · L.T 이현욱 · T.T 임승호'},
-];
-
-let selectedYear = null;
-
-function renderHistory(el) {
-  el.innerHTML = `
-  <div class="appbar">
-    <div>
-      <div class="appbar-title">연혁 아카이브</div>
-      <div class="appbar-sub">과거 수첩 열람</div>
-    </div>
-  </div>
-  <div id="history-body" class="scroll" style="padding-bottom:24px"></div>`;
-  renderHistoryList(el.querySelector('#history-body'));
-}
-
-function renderHistoryList(container) {
-  let html = `<div class="section-label">회기 선택</div>`;
-  HISTORY.forEach(h => {
-    html += `<div onclick="showYearDetail(${HISTORY.indexOf(h)})" class="year-card${h.current?' current':''}">
-      <div>
-        <div style="font-size:16px;font-weight:700;color:var(--ink)">${h.year}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">${h.gen} · 회장 ${h.president}</div>
-      </div>
-      ${h.current?'<span class="year-badge-current">현재</span>':'<span class="year-badge-past">보기 →</span>'}
-    </div>`;
+// ── 집계 ──────────────────────────────────────────────────────
+function aggregate(name, startKey, endKey){
+  var R = {P:0,A:0,L:0,M:0,S:0,RGI:0,RGO:0,V:0,M121:0,N:0,O:0,totalWeeks:0,remainWeeks:0,months:[]};
+  var allKeys = MONTHS.filter(function(k){return k>=startKey && k<=endKey;});
+  var firstIdx = -1;
+  for(var i=0;i<allKeys.length;i++){
+    if(MONTHLY[allKeys[i]].members.some(function(mb){return mb.name===name;})){ firstIdx=i; break; }
+  }
+  if(firstIdx<0) return R;
+  var validKeys = allKeys.slice(firstIdx);
+  validKeys.forEach(function(k){
+    var md = MONTHLY[k], mb = null;
+    for(var j=0;j<md.members.length;j++) if(md.members[j].name===name){ mb=md.members[j]; break; }
+    if(!mb) return;
+    R.P+=mb.P; R.A+=mb.A; R.L+=mb.L; R.M+=mb.M; R.S+=mb.S;
+    R.RGI+=mb.RGI; R.RGO+=mb.RGO; R.V+=mb.V; R.M121+=mb.M121;
+    R.N+=mb.N; R.O+=mb.O;
+    R.months.push(k); R.totalWeeks+=md.actualWeeks;
   });
-
-  html += `<div class="section-label" style="margin-top:8px">클럽 주요 연혁</div>
-  <div class="card">
-    <div class="row"><div><div class="row-label">조직총회</div><div class="row-val">1960년 6월 18일 · 부산은행 집회소</div></div></div>
-    <div class="row"><div><div class="row-label">헌장의 밤</div><div class="row-val">1960년 9월 24일</div></div></div>
-    <div class="row"><div><div class="row-label">창립 회원</div><div class="row-val">고 박근수 외 27명</div></div></div>
-    <div class="row"><div><div class="row-label">스폰서</div><div class="row-val">미공군 헤레나 중령</div></div></div>
-    <div class="row"><div><div class="row-label">국내 자매결연</div><div class="row-val">2009. 2. 19 서울 L.C</div></div></div>
-  </div>`;
-  container.innerHTML = html;
+  if(validKeys.length>0){
+    var lmd = MONTHLY[validKeys[validKeys.length-1]];
+    R.remainWeeks = Math.max(0, lmd.fullWeeks - lmd.actualWeeks);
+  }
+  return R;
+}
+function getConfirmedKey(){
+  var last = MONTHS[MONTHS.length-1];
+  if(MONTHLY[last].remainWeeks>0 && MONTHS.length>1) return MONTHS[MONTHS.length-2];
+  return last;
+}
+function getOngoingKey(){
+  var last = MONTHS[MONTHS.length-1];
+  return MONTHLY[last].remainWeeks>0 ? last : null;
+}
+function getConfirmedAgg(name){
+  var ck = getConfirmedKey();
+  return aggregate(name, rollingStart(ck), ck);
 }
 
-function showYearDetail(idx) {
-  const h = HISTORY[idx];
-  const screens = document.getElementById('screens');
-  const div = document.createElement('div');
-  div.className = 'screen';
-  div.style.cssText = 'position:absolute;inset:0;z-index:10;display:flex;flex-direction:column';
-  screens.appendChild(div);
-
-  div.innerHTML = `
-  <div class="appbar">
-    <button class="appbar-back" onclick="this.closest('.screen').remove()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-    <div>
-      <div class="appbar-title">${h.year} ${h.gen}</div>
-      <div class="appbar-sub">회장 ${h.president}</div>
-    </div>
-  </div>
-  <div class="scroll" style="padding-bottom:30px">
-    <div style="margin:16px;border-radius:18px;background:linear-gradient(135deg,#1c3e72,#0e2140);color:#fff;padding:22px;text-align:center">
-      <div style="font-size:12px;color:var(--gold-l);letter-spacing:3px">국제라이온스협회 355-A지구</div>
-      <div style="width:36px;height:1px;background:var(--gold);margin:12px auto;opacity:.7"></div>
-      <div class="crest" style="margin:0 auto 16px">L</div>
-      <div style="font-size:22px;font-weight:800">부산라이온스클럽</div>
-      <div style="font-size:12px;color:var(--gold-l);margin-top:6px;letter-spacing:3px">BUSAN LIONS CLUB</div>
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:8px 18px;border-radius:30px;background:rgba(240,192,64,.15);border:1px solid rgba(240,192,64,.4)">
-        <span style="font-size:14px;color:var(--gold);font-weight:700">${h.gen}</span>
-        <span style="width:4px;height:4px;border-radius:50%;background:var(--gold)"></span>
-        <span style="font-size:14px;color:#fff;font-weight:700">${h.year}</span>
-      </div>
-    </div>
-
-    <div class="section-label">회장단</div>
-    <div class="card">
-      <div class="row"><div><div class="row-label">회장</div><div class="row-val" style="font-size:18px;font-weight:800;color:var(--navy)">${h.president}</div></div></div>
-      ${h.guide?`<div class="row"><div><div class="row-label">회장지침</div><div class="row-val">${h.guide}</div></div></div>`:''}
-    </div>
-
-    <div class="section-label">5역 임원</div>
-    <div class="card">
-      ${h.officers.split(' · ').map(o=>`<div class="row"><div class="row-val">${o}</div></div>`).join('')}
-    </div>
-  </div>`;
+// ── 점수 계산 (기존 공식 동일) ─────────────────────────────────
+function calcScore(agg, extra){
+  extra = extra||0;
+  var tot = agg.totalWeeks + extra;
+  if(tot===0) return {total:0, bd:{abs:0,time:0,ref:0,vis:0,otwone:0,tyfcb:0,train:0}, rates:{rW:0,vW:0,oW:0}};
+  var ref = agg.RGI + agg.RGO;
+  var rW = ref/tot, vW = agg.V/tot, oW = agg.M121/tot;
+  var abs   = agg.A>2 ? 0 : agg.A===2 ? 5 : agg.A===1 ? 10 : 15;
+  var time  = agg.L>=2 ? 0 : agg.L===1 ? 5 : 10;
+  var refPt = rW<0.5?0 : rW<0.75?5 : rW<1?10 : rW<1.2?15 : 20;
+  var visPt = vW<0.1?0 : vW<0.2?5 : vW<0.4?10 : vW<0.6?15 : 20;
+  var oPt   = oW<1?0 : oW<2?5 : 10;
+  var tyfcb = agg.N<25000000?0 : agg.N<50000000?5 : agg.N<100000000?10 : 15;
+  var trPt  = agg.O<10?0 : agg.O<20?5 : 10;
+  return {
+    total: abs+time+refPt+visPt+oPt+tyfcb+trPt,
+    bd: {abs:abs,time:time,ref:refPt,vis:visPt,otwone:oPt,tyfcb:tyfcb,train:trPt},
+    rates: {rW:rW,vW:vW,oW:oW}
+  };
 }
+
+// ── 데이터바 ──────────────────────────────────────────────────
+function updateDbar(){
+  var last = MONTHS[MONTHS.length-1];
+  var dns = ['일','월','화','수','목','금','토'];
+  $('dinfo').innerHTML = '<b>'+CHAPTER+'</b> '+dns[DOW]+'요일 | '+MONTHS.length+'개월 | '+MEMBERS.length+'명 | 최신: '+last;
+  $('nsub').textContent = CHAPTER+' · '+MEMBERS.length+'명 · '+last;
+  var html='';
+  MONTHS.forEach(function(k){
+    var md=MONTHLY[k], isLast=(k===last), isOn=isLast&&md.remainWeeks>0;
+    var cls = isOn?'mc og':isLast?'mc cf':'mc';
+    var lbl = isOn ? keyLabel(k)+'('+md.actualWeeks+'/'+md.fullWeeks+'주)' : keyLabel(k);
+    html += '<span class="'+cls+'">'+lbl+'</span>';
+  });
+  $('mchips').innerHTML = html;
+}
+
+// ── 전체 현황 ─────────────────────────────────────────────────
+function renderStats(){
+  var counts={Green:0,Amber:0,Red:0,Grey:0};
+  MEMBERS.forEach(function(n){ counts[getLight(calcScore(getConfirmedAgg(n),0).total)]++; });
+  $('ttitle').textContent = CHAPTER+' 전체 현황 — '+getConfirmedKey()+' 확정 기준';
+  $('srow').innerHTML =
+    '<div class="sc" data-f="Green"><div class="sc-lbl">🟢 그린</div><div class="sc-val vg">'+counts.Green+'</div></div>'+
+    '<div class="sc" data-f="Amber"><div class="sc-lbl">🟡 앰버</div><div class="sc-val va">'+counts.Amber+'</div></div>'+
+    '<div class="sc" data-f="Red"><div class="sc-lbl">🔴 레드</div><div class="sc-val vr">'+counts.Red+'</div></div>'+
+    '<div class="sc" data-f="Grey"><div class="sc-lbl">⬛ 그레이</div><div class="sc-val vgr">'+counts.Grey+'</div></div>';
+  var scs = $('srow').querySelectorAll('.sc');
+  for(var i=0;i<scs.length;i++){
+    scs[i].addEventListener('click', function(){
+      var f=this.getAttribute('data-f');
+      var btn = {Green:'fgreen',Amber:'famber',Red:'fred',Grey:'fgrey'}[f];
+      setFilter(f, $(btn));
+    });
+  }
+}
+function renderTable(){
+  var tb=$('tbody'); tb.innerHTML='';
+  MEMBERS.forEach(function(name){
+    var agg=getConfirmedAgg(name), s=calcScore(agg,0), light=getLight(s.total);
+    if(curFilter!=='all' && light!==curFilter) return;
+    var color=lcolor(light), absScore=s.bd.abs+s.bd.time;
+    function gc(v,max){ return v>=max?'var(--g)':v>0?'var(--a)':'var(--r)'; }
+    var tr=document.createElement('tr');
+    tr.innerHTML =
+      '<td><strong>'+name+'</strong></td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--mut)">'+agg.totalWeeks+'주</td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">결'+agg.A+'/지'+agg.L+'</div><div style="font-weight:700;color:'+gc(absScore,25)+'">'+absScore+'점</div></td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">'+(agg.RGI+agg.RGO)+'건</div><div style="font-weight:700;color:'+gc(s.bd.ref,20)+'">'+s.bd.ref+'점</div></td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">'+agg.V+'명</div><div style="font-weight:700;color:'+gc(s.bd.vis,20)+'">'+s.bd.vis+'점</div></td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">'+agg.M121+'건</div><div style="font-weight:700;color:'+gc(s.bd.otwone,10)+'">'+s.bd.otwone+'점</div></td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">'+(agg.N>0?agg.N.toLocaleString('ko-KR'):'0')+'</div><div style="font-weight:700;color:'+gc(s.bd.tyfcb,15)+'">'+s.bd.tyfcb+'점</div></td>'+
+      '<td style="text-align:center"><div style="font-size:10px;color:var(--mut)">'+agg.O+'점</div><div style="font-weight:700;color:'+gc(s.bd.train,10)+'">'+s.bd.train+'점</div></td>'+
+      '<td style="text-align:center;font-size:17px;font-weight:900;color:'+color+'">'+s.total+'</td>'+
+      '<td><span class="badge '+light+'">'+lkor(light)+'</span></td>';
+    tr.addEventListener('click', function(){ goPersonal(name); });
+    tb.appendChild(tr);
+  });
+  if(!tb.children.length) tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--mut)">해당 조건의 멤버 없음</td></tr>';
+}
+function setFilter(f,btn){
+  curFilter=f;
+  var btns=document.querySelectorAll('.fb');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('on');
+  if(btn) btn.classList.add('on');
+  renderTable();
+}
+$('fall').onclick=function(){setFilter('all',this);};
+$('fgreen').onclick=function(){setFilter('Green',this);};
+$('famber').onclick=function(){setFilter('Amber',this);};
+$('fred').onclick=function(){setFilter('Red',this);};
+$('fgrey').onclick=function(){setFilter('Grey',this);};
+
+// ── 개인 상세 ─────────────────────────────────────────────────
+function renderChips(){
+  var html='';
+  MEMBERS.forEach(function(n){ html+='<button class="chip" id="chip-'+n+'" data-name="'+n+'">'+n+'</button>'; });
+  $('chips').innerHTML=html;
+  var els=$('chips').querySelectorAll('button');
+  for(var k=0;k<els.length;k++) els[k].addEventListener('click',function(){ selectMember(this.getAttribute('data-name')); });
+}
+function goPersonal(name){ switchView('personal'); selectMember(name); }
+function selectMember(name){
+  selName=name; selMode='current';
+  var chips=document.querySelectorAll('.chip');
+  for(var i=0;i<chips.length;i++) chips[i].classList.remove('on');
+  var c=$('chip-'+name);
+  if(c){ c.classList.add('on'); c.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  $('pdet').classList.add('show');
+  buildPbtns(); updatePersonal();
+}
+function buildPbtns(){
+  var ck=getConfirmedKey(), ok=getOngoingKey(), ckp=parseKeyStr(ck);
+  var mns=['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var btns=[{mode:'current',label:mns[ckp.month]+' 확정'}];
+  if(ok){ var okp=parseKeyStr(ok); btns.push({mode:ok,label:mns[okp.month]+' 예상'}); }
+  var basep = ok?parseKeyStr(ok):ckp, cy=basep.year, cm=basep.month;
+  for(var i=0;i<3;i++){
+    cm++; if(cm>12){cm=1;cy++;}
+    btns.push({mode:toKey(cy,cm),label:mns[cm]+' 예상'});
+  }
+  var html='';
+  btns.forEach(function(b){
+    var cls = selMode===b.mode ? (b.mode==='current'?'pbtn cur':'pbtn pred') : 'pbtn';
+    html+='<button class="'+cls+'" data-mode="'+b.mode+'">'+b.label+'</button>';
+  });
+  $('pbtns').innerHTML=html;
+  var els=$('pbtns').querySelectorAll('button');
+  for(var j=0;j<els.length;j++) els[j].addEventListener('click',function(){ selMode=this.getAttribute('data-mode'); buildPbtns(); updatePersonal(); });
+}
+// 모드에 따른 집계 (updatePersonal / copyFeedback 공용)
+function modeAgg(name, mode){
+  var last=MONTHS[MONTHS.length-1], lmd=MONTHLY[last];
+  var ck=getConfirmedKey(), ok=getOngoingKey();
+  var mns=['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var agg, extra=0, rangeLabel='', droppingKeys=[], modeLbl='';
+  if(mode==='current'){
+    agg=aggregate(name, rollingStart(ck), ck);
+    rangeLabel=rollingStart(ck)+' ~ '+ck+' 확정 ('+agg.totalWeeks+'주)';
+    modeLbl=mns[parseKeyStr(ck).month]+' 확정';
+  } else if(ok && mode===ok){
+    agg=aggregate(name, rollingStart(ok), ok);
+    extra=agg.remainWeeks;
+    rangeLabel=rollingStart(ok)+' ~ '+ok+' 진행중 ('+agg.totalWeeks+'주 + 남은 '+agg.remainWeeks+'주)';
+    modeLbl=mns[parseKeyStr(ok).month]+' 예상';
+  } else {
+    var predEnd=mode, predStart=rollingStart(predEnd), curStart=rollingStart(last);
+    var realStart = predStart>(MONTHS[0]||'') ? predStart : (MONTHS[0]||predStart);
+    agg=aggregate(name, realStart, last);
+    var pe=parseKeyStr(predEnd), cy=lmd.year, cm=lmd.month, futW=0;
+    while(true){
+      cm++; if(cm>12){cm=1;cy++;}
+      if(cy>pe.year || (cy===pe.year && cm>pe.month)) break;
+      futW+=countDOW(cy,cm,DOW);
+    }
+    extra=agg.remainWeeks+futW;
+    MONTHS.forEach(function(k){
+      if(k>=curStart && k<predStart && MONTHLY[k].members.some(function(mb){return mb.name===name;})) droppingKeys.push(k);
+    });
+    rangeLabel=realStart+' ~ '+predEnd+' 예측 ('+(agg.totalWeeks+extra)+'주)';
+    modeLbl=mns[pe.month]+' 예상';
+  }
+  return {agg:agg, extra:extra, rangeLabel:rangeLabel, droppingKeys:droppingKeys, modeLbl:modeLbl};
+}
+function updatePersonal(){
+  if(!selName) return;
+  var m = modeAgg(selName, selMode);
+  var agg=m.agg, extra=m.extra;
+  var score=calcScore(agg,extra), light=getLight(score.total), color=lcolor(light);
+
+  var dropHtml = m.droppingKeys.length>0 ?
+    '<div style="font-size:11px;color:var(--a);margin-top:3px">⚠️ 빠지는 달: '+m.droppingKeys.map(keyLabel).join(', ')+'</div>' : '';
+  var gapHtml = score.total>=70 ?
+    '<div style="font-size:12px;margin-top:3px;text-align:right;color:var(--g)">✅ 그린 달성!</div>' :
+    '<div style="font-size:12px;margin-top:3px;text-align:right;color:var(--a)">🎯 그린까지 '+(70-score.total)+'점</div>';
+
+  $('pcard').innerHTML =
+    '<div class="pcard-top"><div><div class="pname">'+selName+'</div>'+
+    '<div style="margin-top:6px"><span class="badge '+light+'">'+lkor(light)+'</span></div>'+
+    '<div style="font-size:11px;color:var(--mut);margin-top:5px">'+m.rangeLabel+'</div>'+dropHtml+'</div>'+
+    '<div><div class="pbig" style="color:'+color+'">'+score.total+'</div>'+
+    '<div class="pbig-sub">/ 100점</div>'+gapHtml+'</div></div>';
+
+  var naScore=calcScore(agg,0).total, naLight=getLight(naScore);
+  $('nacard').innerHTML =
+    '<div class="na-lbl">📊 지금까지 실적만으로 마감하면</div>'+
+    '<span class="na-score" style="color:'+lcolor(naLight)+'">'+naScore+'점</span>'+
+    '<span class="badge '+naLight+'">'+lkor(naLight)+'</span>'+
+    '<span style="font-size:11px;color:var(--mut)">'+(extra>0?'남은 '+extra+'주 동안 더 해야 해요':'현재 확정 점수')+'</span>';
+
+  renderActTable(agg, score, extra);
+  renderFeedback(agg, score, extra, m.droppingKeys);
+}
+
+// ── 부족분 역산 ───────────────────────────────────────────────
+function computeChoices(agg, score, extra, target){
+  var totalW=agg.totalWeeks+extra;
+  var rPW=agg.totalWeeks>0?(agg.RGI+agg.RGO)/agg.totalWeeks:0;
+  var vPW=agg.totalWeeks>0?agg.V/agg.totalWeeks:0;
+  var oPW=agg.totalWeeks>0?agg.M121/agg.totalWeeks:0;
+  var gap=Math.max(0,target-score.total);
+  if(gap<=0) return {gap:0,choices:[],min:0,done:true};
+  var ch=[];
+  if(score.bd.abs<15) ch.push({ico:'📅',lbl:'결석 없이 출석',txt:'앞으로 결석 없으면',sub:'+'+(15-score.bd.abs)+'점 회복',pts:15-score.bd.abs});
+  if(score.bd.time<10) ch.push({ico:'⏰',lbl:'정시 도착',txt:'앞으로 지각 없으면',sub:'+'+(10-score.bd.time)+'점 회복',pts:10-score.bd.time});
+  if(score.bd.ref<20){
+    var nr=score.bd.ref===0?0.5:score.bd.ref===5?0.75:score.bd.ref===10?1.0:1.2;
+    var needR=Math.max(0,Math.ceil(nr*totalW)-(agg.RGI+agg.RGO));
+    if(needR>0){
+      var pw=extra>0?(needR/extra).toFixed(1):'-';
+      ch.push({ico:'🤝',lbl:'리퍼럴',txt:needR+'건 추가 → +5점',sub:extra>0?'남은 '+extra+'주 주당 '+pw+'건':'현재 주당 '+rPW.toFixed(2)+'건',pts:5});
+    }
+  }
+  if(score.bd.vis<20){
+    var steps=[0.1,0.2,0.4,0.6], nv=0.6;
+    for(var i=0;i<steps.length;i++){ if(Math.ceil(steps[i]*totalW)>agg.V){nv=steps[i];break;} }
+    var needV=Math.max(0,Math.ceil(nv*totalW)-agg.V);
+    if(needV>0) ch.push({ico:'👥',lbl:'비지터',txt:needV+'명 초대 → +5점',sub:'현재 주당 '+vPW.toFixed(2)+'명',pts:5});
+  }
+  if(score.bd.otwone<10){
+    var no=score.bd.otwone===0?1:2;
+    var needO=Math.max(0,Math.ceil(no*totalW)-agg.M121);
+    if(needO>0){
+      var pw2=extra>0?(needO/extra).toFixed(1):'-';
+      ch.push({ico:'☕',lbl:'1:1',txt:needO+'건 더 → +5점',sub:extra>0?'남은 '+extra+'주 주당 '+pw2+'건':'현재 주당 '+oPW.toFixed(2)+'건',pts:5});
+    }
+  }
+  if(score.bd.tyfcb<15){
+    var nt=score.bd.tyfcb===0?25000000:score.bd.tyfcb===5?50000000:100000000;
+    var needN=Math.max(0,nt-agg.N);
+    if(needN>0) ch.push({ico:'💰',lbl:'감사장',txt:needN.toLocaleString('ko-KR')+'원 더 → +5점',sub:'목표 '+nt.toLocaleString('ko-KR')+'원',pts:5});
+  }
+  if(score.bd.train<10){
+    var needE=score.bd.train===0?Math.max(0,10-agg.O):Math.max(0,20-agg.O);
+    if(needE>0) ch.push({ico:'📚',lbl:'교육점수',txt:needE+'점 추가 → +5점',sub:'포럼·팟캐스트',pts:5});
+  }
+  var sorted=ch.slice().sort(function(a,b){return b.pts-a.pts;});
+  var cum=0,mn=0;
+  for(var j=0;j<sorted.length;j++){ cum+=sorted[j].pts; mn++; if(cum>=gap) break; }
+  return {gap:gap,choices:ch,min:mn,done:false};
+}
+function renderFeedback(agg, score, extra, droppingKeys){
+  var light=getLight(score.total);
+  var rPW=agg.totalWeeks>0?(agg.RGI+agg.RGO)/agg.totalWeeks:0;
+  var vPW=agg.totalWeeks>0?agg.V/agg.totalWeeks:0;
+  var oPW=agg.totalWeeks>0?agg.M121/agg.totalWeeks:0;
+  var fbCls=light==='Grey'?'grey':light==='Red'?'red':light==='Amber'?'amber':'green';
+  var ftCls=light==='Grey'?'ftg':light==='Red'?'ftr':light==='Amber'?'fta':'ftg2';
+  var dropLine=droppingKeys.length>0?'<div class="fb-row"><span class="fb-ico">⚠️</span><span class="fb-txt">빠지는 달('+droppingKeys.map(keyLabel).join(', ')+') 영향 반영</span></div>':'';
+  var html='<div class="fb-box fb-'+fbCls+'"><div class="fb-title '+ftCls+'">💡 현재 활동 페이스</div>'+
+    '<div class="fb-row"><span class="fb-ico">📈</span><span class="fb-txt">주당 평균 — 리퍼럴 '+rPW.toFixed(2)+'건 / 비지터 '+vPW.toFixed(2)+'명 / 1:1 '+oPW.toFixed(2)+'건</span></div>'+
+    (extra>0?'<div class="fb-row"><span class="fb-ico">⏰</span><span class="fb-txt">남은 <b>'+extra+'주</b> 기준 피드백이에요</span></div>':'')+
+    dropLine+'</div>';
+  function makeFb(cls,ftc,emoji,title,target){
+    var r=computeChoices(agg,score,extra,target);
+    if(r.done) return '<div class="fb-box fb-'+cls+'"><div class="fb-title '+ftc+'">'+emoji+' '+title+' ✅ 달성!</div>'+
+      '<div class="fb-row"><span class="fb-ico">🏆</span><span class="fb-txt">현재 페이스 유지하면 달성 가능해요!</span></div></div>';
+    var rows='';
+    r.choices.forEach(function(c){
+      rows+='<div class="fb-row"><span class="fb-ico">'+c.ico+'</span>'+
+        '<span class="fb-txt">'+c.lbl+' '+c.txt+(c.sub?' <span style="color:var(--mut);font-size:11px">('+c.sub+')</span>':'')+'</span>'+
+        '<span class="fb-pts">+'+c.pts+'점</span></div>';
+    });
+    return '<div class="fb-box fb-'+cls+'"><div class="fb-title '+ftc+'">'+emoji+' '+title+' — '+r.gap+'점 필요</div>'+
+      '<div class="fb-cnt">아래 중 <b>'+r.min+'개 이상</b> 달성하면 '+title.replace(/\(.*\)/,'').trim()+' 달성!</div>'+rows+'</div>';
+  }
+  if(light==='Grey'){ html+=makeFb('red','ftr','🔴','레드(30점)',30)+makeFb('amber','fta','🟡','앰버(50점)',50)+makeFb('green','ftg2','🟢','그린(70점)',70); }
+  else if(light==='Red'){ html+=makeFb('amber','fta','🟡','앰버(50점)',50)+makeFb('green','ftg2','🟢','그린(70점)',70); }
+  else if(light==='Amber'){ html+=makeFb('green','ftg2','🟢','그린(70점)',70); }
+  else { html+=makeFb('green','ftg2','🏆','그린 유지!',71); }
+  $('fbwrap').innerHTML=html;
+}
+function renderActTable(agg, score, extra){
+  var tw=agg.totalWeeks+extra;
+  var rows=[
+    {name:'출석/결석',cur:'출석 '+agg.P+'회 / 결석 '+agg.A+'회',need:null,std:'결석 0회→15점'},
+    {name:'지각',cur:agg.L+'회',need:null,std:'지각 0회→10점'},
+    {name:'리퍼럴(T1+T2)',cur:(agg.RGI+agg.RGO)+'건',need:Math.max(0,Math.ceil(1.2*tw)-(agg.RGI+agg.RGO)),unit:'건',std:'목표 '+Math.ceil(1.2*tw)+'건 (주당 1.2건)'},
+    {name:'비지터',cur:agg.V+'명',need:Math.max(0,Math.ceil(0.6*tw)-agg.V),unit:'명',std:'목표 '+Math.ceil(0.6*tw)+'명 (주당 0.6명)'},
+    {name:'1:1 원투원',cur:agg.M121+'건',need:Math.max(0,Math.ceil(2*tw)-agg.M121),unit:'건',std:'목표 '+Math.ceil(2*tw)+'건 (주당 2건)'},
+    {name:'감사장',cur:won(agg.N),need:agg.N>=100000000?0:null,std:'목표 1억 이상'},
+    {name:'교육점수',cur:agg.O+'점',need:Math.max(0,20-agg.O),unit:'점',std:'목표 20점'}
+  ];
+  var html='<thead><tr><th>항목</th><th>현재 누적</th><th>더 필요</th><th>그린 기준</th></tr></thead><tbody>';
+  rows.forEach(function(row){
+    var nd = row.need===null?'<span class="cmut">—</span>':
+      row.need===0?'<span class="cok">✓ 달성</span>':
+      '<span class="cbad">+'+row.need+(row.unit||'')+'</span>';
+    html+='<tr><td class="albl">'+row.name+'</td><td class="ccur">'+row.cur+'</td><td>'+nd+'</td>'+
+      '<td class="cmut" style="font-family:inherit;font-size:11px">'+row.std+'</td></tr>';
+  });
+  $('atable').innerHTML=html+'</tbody>';
+}
+
+// ── 카톡 피드백 복사 ──────────────────────────────────────────
+function buildFeedbackText(name, mode){
+  var m=modeAgg(name, mode);
+  var agg=m.agg, extra=m.extra;
+  var score=calcScore(agg,extra), light=getLight(score.total);
+  var lines=[];
+  var korName = name.replace(/[a-zA-Z,\-\.\s]+/g,'').trim() || name.split(' ')[0];
+  lines.push('안녕하세요 '+korName+' 대표님');
+  lines.push('트래픽 라이트 피드백 ('+m.modeLbl+')');
+  lines.push('');
+  lines.push(lkor(light)+' '+score.total+'점');
+  lines.push('');
+  function pushTarget(label, target){
+    var r=computeChoices(agg, score, extra, target);
+    if(r.done || r.gap<=0) return;
+    lines.push('['+label+'] '+r.gap+'점 필요');
+    lines.push('아래 중 '+r.min+'개만 하면 달성!');
+    r.choices.forEach(function(c){ lines.push(c.ico+' '+c.lbl+' '+c.txt+(c.sub?' ('+c.sub+')':'')); });
+    lines.push('');
+  }
+  if(score.total>=70){
+    lines.push('그린 달성! 이 페이스 유지해요');
+    lines.push('');
+    var mt=computeChoices(agg,score,extra,score.total+1);
+    if(!mt.done && mt.choices.length>0){
+      lines.push('🏆 그린 유지 포인트');
+      mt.choices.forEach(function(c){ lines.push(c.ico+' '+c.lbl+' '+c.txt); });
+      lines.push('');
+    }
+  } else {
+    if(light==='Grey'){ pushTarget('레드(30점)',30); pushTarget('앰버(50점)',50); pushTarget('그린(70점)',70); }
+    else if(light==='Red'){ pushTarget('앰버(50점)',50); pushTarget('그린(70점)',70); }
+    else { pushTarget('그린(70점)',70); }
+  }
+  lines.push('화이팅이에요!');
+  lines.push('- BNI 파이오니어 챕터 송승훈');
+  return lines.join('\n');
+}
+$('copybtn').onclick = function(){
+  if(!selName) return;
+  var txt = buildFeedbackText(selName, selMode);
+  function done(){ toast('복사됐어요! 카톡에 붙여넣기 하세요'); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(function(){ legacyCopy(txt); done(); });
+  } else { legacyCopy(txt); done(); }
+};
+function legacyCopy(txt){
+  var ta=document.createElement('textarea');
+  ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+// ── 로또 ──────────────────────────────────────────────────────
+(function(){
+  function ballColor(n){ return n<=10?'#e8a900':n<=20?'#2563eb':n<=30?'#dc2626':n<=40?'#6b7280':'#16a34a'; }
+  function pickFiltered(){
+    for(var t=0;t<2000;t++){
+      var pool=[]; for(var i=1;i<=45;i++) pool.push(i);
+      for(var j=pool.length-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)); var tmp=pool[j];pool[j]=pool[k];pool[k]=tmp; }
+      var nums=pool.slice(0,6).sort(function(a,b){return a-b;});
+      var lo=0,mi=0,hi=0;
+      nums.forEach(function(n){ if(n<=15)lo++;else if(n<=30)mi++;else hi++; });
+      if(lo===0||mi===0||hi===0) continue;
+      var consec=1,maxC=1;
+      for(var x=1;x<6;x++){ if(nums[x]===nums[x-1]+1){consec++;if(consec>maxC)maxC=consec;}else consec=1; }
+      if(maxC>=3) continue;
+      var sum=nums.reduce(function(a,b){return a+b;},0);
+      if(sum<90||sum>160) continue;
+      var odd=nums.filter(function(n){return n%2!==0;}).length;
+      if(odd===0||odd===6) continue;
+      return nums;
+    }
+    var arr=[]; while(arr.length<6){ var n=Math.floor(Math.random()*45)+1; if(arr.indexOf(n)<0)arr.push(n); }
+    return arr.sort(function(a,b){return a-b;});
+  }
+  $('lotto-btn').onclick=function(){
+    var btn=this; btn.disabled=true; btn.textContent='🎲 뽑는 중...';
+    for(var i=0;i<6;i++){ var b=$('lb'+i); b.classList.remove('show'); b.style.background=''; $('ls'+i).textContent='?'; }
+    var nums=pickFiltered();
+    function reveal(idx){
+      if(idx>=6){ btn.disabled=false; btn.textContent='🎯 번호 다시 뽑기'; return; }
+      var ball=$('lb'+idx), span=$('ls'+idx);
+      ball.style.background=ballColor(nums[idx]);
+      ball.classList.add('show');
+      var ticker=0;
+      var iv=setInterval(function(){
+        span.textContent=Math.floor(Math.random()*45)+1;
+        if(++ticker>12){ clearInterval(iv); span.textContent=nums[idx]; setTimeout(function(){reveal(idx+1);},250); }
+      },60);
+    }
+    setTimeout(function(){reveal(0);},150);
+  };
+})();
+
+// ── 뷰 전환 ───────────────────────────────────────────────────
+function switchView(v){
+  if(!MONTHS.length && v!=='panel'){ toast('데이터 로드 후 이용 가능해요','err'); return; }
+  $('tab-panel').className = v==='panel'?'ntab on':'ntab';
+  $('tab-personal').className = v==='personal'?'ntab on':'ntab';
+  $('pview').style.display = v==='panel'?'block':'none';
+  $('perv').style.display = v==='personal'?'block':'none';
+}
+$('tab-panel').onclick=function(){switchView('panel');};
+$('tab-personal').onclick=function(){switchView('personal');};
+
+// ── 서비스워커 등록 + 부팅 ─────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+window.addEventListener('online', function(){ boot(); });
+boot();
 </script>
 </body>
 </html>
