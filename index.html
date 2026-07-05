@@ -310,58 +310,93 @@ function tableToRows(table){
   return rows;
 }
 var JUNK_NAMES = ['비지터','BNI','합','합계','계','총계','한글이름순','영어이름순'];
-function parseMonthRows(rows, y, m){
-  if(!rows || rows.length < 2) return null;
-  // 헤더 행 찾기: '멤버' 또는 '이름' 포함
-  var hi = -1;
-  for(var r=0; r<Math.min(rows.length,4); r++){
-    var joined = rows[r].map(function(v){return String(v);}).join('|');
-    if(joined.indexOf('멤버')>=0 || joined.indexOf('이름')>=0 || joined.indexOf('출석')>=0){ hi=r; break; }
-  }
-  if(hi<0){
-    var preview = rows.slice(0,3).map(function(r,i){ return i+':['+r.map(function(v){return String(v);}).join(',')+']'; }).join(' ');
-    throw new Error('헤더행을 못 찾음 (앞 3행: '+preview+')');
-  }
-  var hd = rows[hi].map(function(v){ return String(v||'').trim(); });
-  function fi(keys){
-    for(var i=0;i<hd.length;i++)
-      for(var j=0;j<keys.length;j++)
-        if(hd[i].indexOf(keys[j])>=0) return i;
-    return -1;
-  }
-  var idx = {
-    name: fi(['멤버','이름','First']),
-    P: fi(['출석','P ']), A: fi(['결석','A ']), L: fi(['지각','L ']),
-    M: fi(['병가','M ']), S: fi(['대리','S ']),
-    RGI: fi(['준 T1','준T1','RGI']), RGO: fi(['준 T2','준T2','RGO']),
-    V: fi(['비지터','V ']), M121: fi(['1-2-1','121','원투원']),
-    N: fi(['감사장','Value of Business','Value']), O: fi(['CEU','교육','Training'])
-  };
-  if(idx.name<0 || idx.P<0){
-    throw new Error('헤더행은 찾았으나 컬럼 인식 실패 ('+hi+'행 내용: ['+hd.join(',')+'])');
-  }
-
+// 표준 열 순서(모든 달 동일하게 써온 순서) — 헤더 텍스트 인식이 실패해도 이 순서로 강제 추출
+var STD_ORDER = ['name','P','A','L','M','S','RGI','RGO',null,null,'V','M121','N','O'];
+function looksLikeMemberRow(raw){
+  if(!raw) return false;
+  var kor = raw.split(/\s+/)[0].trim();
+  if(kor.length<2) return false;
+  if(JUNK_NAMES.indexOf(kor)>=0 || JUNK_NAMES.indexOf(raw)>=0) return false;
+  return /[가-힣]{2,}/.test(kor);
+}
+// 위치 기반 강제 스캔: 헤더 글자와 무관하게, 표에서 "이름처럼 생긴 줄"을 전부 멤버로 인정
+// (단, 헤더 셀 자체를 멤버로 오인하지 않도록 "한글이름 + 영문이름" 조합 패턴만 인정)
+function looksLikeFullNameRow(raw){
+  if(!looksLikeMemberRow(raw)) return false;
+  return /^[가-힣]{2,5}[,\s]+[A-Za-z]/.test(raw);
+}
+function positionalScan(rows){
   var members = [];
-  for(var r2=hi+1; r2<rows.length; r2++){
-    var row = rows[r2];
-    var raw = String(row[idx.name]||'').trim();
-    if(!raw || raw==='0') continue;
+  for(var r=0; r<rows.length; r++){
+    var row = rows[r];
+    var raw = String(row[0]||'').trim();
+    if(!looksLikeFullNameRow(raw)) continue;
+    if(row.length < 8) continue; // 열이 너무 적으면 이 표 형식이 아님
     var kor = raw.split(/\s+/)[0].trim();
-    if(kor.length<2) continue;
-    if(JUNK_NAMES.indexOf(kor)>=0 || JUNK_NAMES.indexOf(raw)>=0) continue;
-    if(!/[가-힣]{2,}/.test(kor)) continue; // 한글 이름만 (집계행 제외)
+    var get = function(field){
+      var i = STD_ORDER.indexOf(field);
+      return i<0 ? 0 : num(row[i]);
+    };
     members.push({
       name:kor, full:raw,
-      P:num(row[idx.P]), A:num(row[idx.A]), L:num(row[idx.L]),
-      M:num(row[idx.M]), S:num(row[idx.S]),
-      RGI:num(row[idx.RGI]), RGO:num(row[idx.RGO]),
-      V:num(row[idx.V]), M121:num(row[idx.M121]),
-      N:num(row[idx.N]), O:num(row[idx.O])
+      P:get('P'), A:get('A'), L:get('L'), M:get('M'), S:get('S'),
+      RGI:get('RGI'), RGO:get('RGO'), V:get('V'), M121:get('M121'),
+      N:get('N'), O:get('O')
     });
   }
-  if(!members.length){
-    var rowPreview = rows.slice(hi+1, hi+3).map(function(r,i){ return (hi+1+i)+':['+r.map(function(v){return String(v);}).join(',')+']'; }).join(' ');
-    throw new Error('헤더는 찾았으나 멤버 0명 (헤더 다음 행: '+rowPreview+')');
+  return members;
+}
+function parseMonthRows(rows, y, m){
+  if(!rows || rows.length < 2) return null;
+  var members = [], diagErrs = [];
+
+  // ① 우선 헤더 텍스트를 읽어서 정확히 매칭 시도 (열 순서가 바뀌어도 안전)
+  try {
+    var hi = -1;
+    for(var r=0; r<Math.min(rows.length,8); r++){
+      var joined = rows[r].map(function(v){return String(v);}).join('|');
+      if(joined.indexOf('멤버')>=0 || joined.indexOf('이름')>=0 || joined.indexOf('출석')>=0){ hi=r; break; }
+    }
+    if(hi<0) throw new Error('헤더행 못 찾음');
+    var hd = rows[hi].map(function(v){ return String(v||'').trim(); });
+    function fi(keys){
+      for(var i=0;i<hd.length;i++)
+        for(var j=0;j<keys.length;j++)
+          if(hd[i].indexOf(keys[j])>=0) return i;
+      return -1;
+    }
+    var idx = {
+      name: fi(['멤버','이름','First']),
+      P: fi(['출석','P ']), A: fi(['결석','A ']), L: fi(['지각','L ']),
+      M: fi(['병가','M ']), S: fi(['대리','S ']),
+      RGI: fi(['준 T1','준T1','RGI']), RGO: fi(['준 T2','준T2','RGO']),
+      V: fi(['비지터','V ']), M121: fi(['1-2-1','121','원투원']),
+      N: fi(['감사장','Value of Business','Value']), O: fi(['CEU','교육','Training'])
+    };
+    if(idx.name<0 || idx.P<0) throw new Error('컬럼 인식 실패');
+    for(var r2=hi+1; r2<rows.length; r2++){
+      var row = rows[r2];
+      var raw = String(row[idx.name]||'').trim();
+      if(!looksLikeMemberRow(raw)) continue;
+      var kor = raw.split(/\s+/)[0].trim();
+      members.push({
+        name:kor, full:raw,
+        P:num(row[idx.P]), A:num(row[idx.A]), L:num(row[idx.L]),
+        M:num(row[idx.M]), S:num(row[idx.S]),
+        RGI:num(row[idx.RGI]), RGO:num(row[idx.RGO]),
+        V:num(row[idx.V]), M121:num(row[idx.M121]),
+        N:num(row[idx.N]), O:num(row[idx.O])
+      });
+    }
+    if(!members.length) throw new Error('멤버 0명');
+  } catch(e1){
+    diagErrs.push('헤더매칭: '+e1.message);
+    // ② 헤더 매칭 실패 → 위치 기반 강제 스캔으로 대체 (헤더 글자·공백과 무관하게 작동)
+    members = positionalScan(rows);
+    if(!members.length){
+      diagErrs.push('위치스캔: 이름처럼 생긴 행을 찾지 못함');
+      throw new Error(diagErrs.join(' / '));
+    }
   }
 
   // 실제 진행 주수 = 출결합계 최빈값 (공휴일 자동 반영)
