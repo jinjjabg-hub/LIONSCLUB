@@ -418,14 +418,24 @@ function parseMonthRows(rows, y, m){
 function candidateMonths(){
   var now = new Date();
   var y = now.getFullYear(), m = now.getMonth()+1;
-  // 다음 달부터 과거로 PROBE_BACK개월
-  m++; if(m>12){m=1;y++;}
+  // 이번 달부터 과거로 PROBE_BACK개월 (다음 달은 존재하지 않을 확률이 높아 미리 묻지 않음 — 위조탭 위험 원천 차단)
   var list = [];
   for(var i=0;i<=PROBE_BACK;i++){
     list.push({y:y, m:m});
     m--; if(m<1){m=12;y--;}
   }
   return list;
+}
+// 이번 달·미래 달은 "오늘까지 실제로 있었을 수 있는 최대 미팅 횟수"를 넘을 수 없음
+// (존재하지 않는 탭이 다른 달 데이터를 대신 받아왔을 때 이 상한선을 넘기며 걸러짐)
+function maxWeeksSoFar(y, m){
+  var now = new Date();
+  var ty = now.getFullYear(), tm = now.getMonth()+1, td = now.getDate();
+  if(y < ty || (y===ty && m < tm)) return null; // 이미 지난 달 → 제한 없음
+  if(y > ty || (y===ty && m > tm)) return 0;    // 완전히 미래 달 → 미팅이 있을 수 없음
+  var cnt=0, d=new Date(y,m-1,1);
+  while(d.getMonth()===m-1 && d.getDate()<=td){ if(d.getDay()===DOW) cnt++; d.setDate(d.getDate()+1); }
+  return cnt;
 }
 function fetchMonth(y, m){
   var mm = (m<10 ? '0'+m : ''+m);
@@ -451,6 +461,11 @@ function fetchMonth(y, m){
       try { md = parseMonthRows(tableToRows(parsed.table), y, m); }
       catch(e){ errs.push(names[i]+': 파싱실패 '+e.message); return tryAt(i+1); }
       if(!md){ errs.push(names[i]+': 응답은 받았으나 멤버 데이터 인식 실패'); return tryAt(i+1); }
+      var maxW = maxWeeksSoFar(y, m);
+      if(maxW !== null && md.actualWeeks > maxW){
+        errs.push(names[i]+': 위조 의심 (오늘 기준 최대 '+maxW+'주인데 '+md.actualWeeks+'주로 나옴 — 다른 달 데이터로 추정)');
+        return tryAt(i+1);
+      }
       return {md:md, sig:parsed.sig, errs:errs};
     }).catch(function(){ return tryAt(i+1); });
   }
@@ -464,15 +479,22 @@ function syncFromSheet(){
   }))
     .then(function(results){
       // ★ 위조 탭 감지: 존재하지 않는 탭을 요청하면 구글이 에러 대신 엉뚱한 탭을 대신 주는 경우가 있음.
-      //   서로 다른 달인데 서명(sig)이 겹치면 → 둘 다 가짜(같은 탭이 잘못 재사용된 것)로 간주해 제외.
-      var sigCount = {};
-      results.forEach(function(r){ if(r.md && r.sig){ sigCount[r.sig] = (sigCount[r.sig]||0)+1; } });
-      var fakeKeys = [];
-      results.forEach(function(r){
-        if(r.md && r.sig && sigCount[r.sig] > 1){
-          fakeKeys.push(toKey(r.c.y, r.c.m));
+      //   시간순(오래된 달 → 최근 달)으로 훑으면서, 어떤 서명(sig)이 "처음" 나타나면 진짜로 인정하고,
+      //   그 이후에 다른 달인데 "똑같은 서명"이 또 나오면 그건 가짜(위조)로만 걸러낸다.
+      //   → 진짜 달이 먼저 확인됐다면 절대 억울하게 같이 버려지지 않음.
+      var chronological = results.slice().sort(function(a,b){
+        var ka=toKey(a.c.y,a.c.m), kb=toKey(b.c.y,b.c.m);
+        return ka<kb?-1:ka>kb?1:0;
+      });
+      var seenSigs = {};
+      chronological.forEach(function(r){
+        if(!r.md || !r.sig) return;
+        if(seenSigs[r.sig]){
+          var realKey = seenSigs[r.sig];
           r.md = null;
-          r.errs = (r.errs||[]).concat(['위조탭 감지: 다른 달과 서명(sig) 중복 — 존재하지 않는 탭 요청 시 구글이 대신 내려준 엉뚱한 데이터로 판단']);
+          r.errs = (r.errs||[]).concat(['위조탭 감지: '+realKey+'과 서명(sig) 중복 — 존재하지 않는 탭 요청 시 구글이 '+realKey+' 데이터를 대신 내려준 것으로 판단']);
+        } else {
+          seenSigs[r.sig] = toKey(r.c.y, r.c.m);
         }
       });
       var monthly = {};
