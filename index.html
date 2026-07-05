@@ -318,7 +318,10 @@ function parseMonthRows(rows, y, m){
     var joined = rows[r].map(function(v){return String(v);}).join('|');
     if(joined.indexOf('멤버')>=0 || joined.indexOf('이름')>=0 || joined.indexOf('출석')>=0){ hi=r; break; }
   }
-  if(hi<0) return null;
+  if(hi<0){
+    var preview = rows.slice(0,3).map(function(r,i){ return i+':['+r.map(function(v){return String(v);}).join(',')+']'; }).join(' ');
+    throw new Error('헤더행을 못 찾음 (앞 3행: '+preview+')');
+  }
   var hd = rows[hi].map(function(v){ return String(v||'').trim(); });
   function fi(keys){
     for(var i=0;i<hd.length;i++)
@@ -334,7 +337,9 @@ function parseMonthRows(rows, y, m){
     V: fi(['비지터','V ']), M121: fi(['1-2-1','121','원투원']),
     N: fi(['감사장','Value of Business','Value']), O: fi(['CEU','교육','Training'])
   };
-  if(idx.name<0 || idx.P<0) return null;
+  if(idx.name<0 || idx.P<0){
+    throw new Error('헤더행은 찾았으나 컬럼 인식 실패 ('+hi+'행 내용: ['+hd.join(',')+'])');
+  }
 
   var members = [];
   for(var r2=hi+1; r2<rows.length; r2++){
@@ -354,7 +359,10 @@ function parseMonthRows(rows, y, m){
       N:num(row[idx.N]), O:num(row[idx.O])
     });
   }
-  if(!members.length) return null;
+  if(!members.length){
+    var rowPreview = rows.slice(hi+1, hi+3).map(function(r,i){ return (hi+1+i)+':['+r.map(function(v){return String(v);}).join(',')+']'; }).join(' ');
+    throw new Error('헤더는 찾았으나 멤버 0명 (헤더 다음 행: '+rowPreview+')');
+  }
 
   // 실제 진행 주수 = 출결합계 최빈값 (공휴일 자동 반영)
   var totals = members.map(function(mb){return mb.P+mb.A+mb.L+mb.M+mb.S;}).filter(function(v){return v>0;});
